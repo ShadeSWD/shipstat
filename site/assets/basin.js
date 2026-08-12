@@ -404,12 +404,41 @@
 
   function v2Render(m, F) {
     const px = 52; // масштаб схемы: 52 px/м (модель 2,41 м ≈ 126 px)
-    const tx = -230 + ((V2.dist * px) % 448);
-    $('vx2-cart').setAttribute('transform', `translate(${tx.toFixed(1)} 0)`);
-    $('vx2-rope').setAttribute('x1', Math.min(400 + tx, 592).toFixed(1));
-    const dr = (V2.dist * px) % 16;
+    // «камера» едет вместе с тележкой: модель стоит по центру кадра, а бассейн
+    // с метками дистанции прокручивается — дорожка визуально бесконечна
+    const tx = 0;
+    $('vx2-cart').setAttribute('transform', `translate(${tx} 0)`);
+    $('vx2-rope').setAttribute('x1', '400');
+    // метки дистанции каждые 2 м
+    {
+      const step = 2 * px, off = (V2.dist * px) % step;
+      let g = '';
+      for (let i = -1; i * step - off < 620; i++) {
+        const x = 20 + i * step - off;
+        if (x < 22 || x > 618) continue;
+        const d0 = Math.round((V2.dist + (x - 20 - (620 - 20) / 2) / px) / 2) * 2;
+        g += `<line x1="${x.toFixed(1)}" y1="196" x2="${x.toFixed(1)}" y2="208" stroke="#9a9aa2" stroke-width="1"/>`;
+        g += `<text x="${x.toFixed(1)}" y="194" text-anchor="middle" style="font:9.5px system-ui;fill:#9a9aa2">${d0} м</text>`;
+      }
+      $('vx2-marks').innerHTML = g;
+    }
+    // груз опускается медленно и плавно: ход 70 px за ~13 с хода тележки
+    const dr = ((V2.dist * px) / 10) % 70;
     $('vx2-weight').setAttribute('y', (112 + dr).toFixed(1));
     $('vx2-wline').setAttribute('y2', (112 + dr).toFixed(1));
+    // индикатор разгона: доля достигнутой установившейся скорости и оценка времени
+    {
+      let lo = 0, hi = 2.4;
+      for (let k = 0; k < 40; k++) { const mid = (lo + hi) / 2; if (Rv(mid) < F) lo = mid; else hi = mid; }
+      const vSteady = (lo + hi) / 2;
+      const frac = vSteady > 0 ? Math.min(1, V2.v / vSteady) : 0;
+      $('vx2-bar').setAttribute('width', (600 * frac).toFixed(1));
+      const a = (F - Rv(V2.v)) / (V2.MC + m);
+      const eta = (V2.on && !V2.steady && a > 1e-4) ? (vSteady - V2.v) / a * 1.6 : 0;
+      $('vx2-eta').textContent = !V2.on ? ''
+        : V2.steady ? `установившаяся скорость ${fmt(vSteady, 2)} м/с достигнута`
+        : `разгон до ${fmt(vSteady, 2)} м/с · осталось ≈ ${Math.max(1, Math.round(eta))} с`;
+    }
     // волнообразование: поперечные волны в попутном следе, λ = 2πv²/g, амплитуда ∝ Fr²
     const stern = 264 + tx, bow = 388 + tx;
     const Fr = V2.v / Math.sqrt(G * M.L);

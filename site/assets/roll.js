@@ -277,6 +277,28 @@
       }
       sum += row + '</tr>'; acc += rowA + '</tr>';
     }
+    /* --- живая сводка ключевых величин --- */
+    {
+      const host = $('r-live');
+      const rows = [
+        ['h₀, м', fmt(c.h0, 2)],
+        ['ω_θ, 1/с', fmt(K.wt, 3)],
+        ['T_θ = 2π/ω_θ, с', fmt(2 * Math.PI / K.wt, 2)],
+        ['2ν_θ', fmt(K.nu2, 3)],
+        ['κ_θ (при ω = ω_θ)', fmt(kap(K.Rb, K.wt), 3)],
+        ['резонанс θ_m/α₀', fmt(ch.pv, 2)],
+        [`θ₃%, град (${balls} б.)`, fmt(spF.t3, 2)],
+        [`θ_max, град (${balls} б.)`, fmt(spF.tmax, 2)],
+        ['θ_max с килями, град', fmt(spectral(balls, fns.kili).tmax, 2)],
+      ];
+      const prev = host.__prev || {};
+      host.innerHTML = rows.map(([k, v]) =>
+        `<div class="cell${prev[k] !== undefined && prev[k] !== v ? ' upd' : ''}">
+           <span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+      host.__prev = Object.fromEntries(rows);
+      // снять подсветку через полсекунды
+      setTimeout(() => host.querySelectorAll('.cell.upd').forEach(e => e.classList.remove('upd')), 60);
+    }
     $('r-summary').innerHTML = sum;
     $('r-summary-acc').innerHTML = acc;
   }

@@ -197,3 +197,14 @@ a.card h3 { text-decoration: none; }
 /* кнопки-ссылки (передача данных между разделами) */
 a.btn { text-decoration: none; display: inline-block; }
 a.btn.primary:hover { color: #fff; }
+
+/* живая сводка результатов расчёта качки */
+.live-sum { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.live-sum .cell {
+  background: #fff; border: 1px solid var(--line); border-radius: 10px;
+  padding: 7px 12px; min-width: 120px; font-family: system-ui, sans-serif;
+  transition: background .5s, border-color .5s;
+}
+.live-sum .cell .k { font-size: 12px; color: var(--muted); display: block; }
+.live-sum .cell .v { font-size: 17px; font-weight: 700; color: var(--ink); }
+.live-sum .cell.upd { background: #fdf3d7; border-color: #e7dcb8; transition: none; }
