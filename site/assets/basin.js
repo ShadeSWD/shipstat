@@ -481,6 +481,70 @@
   for (const id of ['l1-K', 'l1-Tn', 'l1-n']) $(id).addEventListener('input', lab1);
   for (const id of ['l2-scale', 'l2-run']) $(id).addEventListener('change', lab2);
   $('vx1-th0').addEventListener('input', e => { $('vx1-th0-out').textContent = e.target.value + '°'; });
+  /* ---------- авто-прогоны (робот-лаборант) ---------- */
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  let autoStop = false;
+  function autoLock(on, ids, btn, stopBtn, prog) {
+    ids.forEach(id => { const e = $(id); if (e) e.disabled = on; });
+    $(btn).style.display = on ? 'none' : '';
+    $(stopBtn).style.display = on ? '' : 'none';
+    $(prog).style.display = on ? '' : 'none';
+  }
+
+  $('vx1-auto').addEventListener('click', async () => {
+    autoStop = false;
+    autoLock(true, ['vx1-go', 'vx1-snap', 'vx1-reset', 'vx1-th0'], 'vx1-auto', 'vx1-stop', 'vx1-prog');
+    $('vx1-prog').textContent = 'кренуем модель…';
+    v1Start();
+    // ждём, пока запись накопит достаточно размахов (или пока не остановят)
+    const T0 = performance.now();
+    while (!autoStop && V1.run && performance.now() - T0 < 26000) {
+      $('vx1-prog').textContent = `запись осциллограммы: размахов ${V1.peaks.length}`;
+      await sleep(250);
+      if (V1.peaks.length >= 20 || V1.A < 1.2) { V1.run = false; cancelAnimationFrame(V1.raf); }
+    }
+    if (!autoStop) {
+      $('vx1-prog').textContent = 'снимаем размахи…';
+      await sleep(400);
+      $('vx1-snap').disabled = false;
+      v1Snap();
+    } else {
+      $('vx1-msg').textContent = 'Авто-опыт прерван.';
+    }
+    autoLock(false, ['vx1-go', 'vx1-reset', 'vx1-th0'], 'vx1-auto', 'vx1-stop', 'vx1-prog');
+    $('vx1-snap').disabled = V1.run;
+  });
+  $('vx1-stop').addEventListener('click', () => { autoStop = true; V1.run = false; });
+
+  $('vx2-auto').addEventListener('click', async () => {
+    autoStop = false;
+    autoLock(true, ['vx2-go', 'vx2-snap', 'vx2-reset', 'vx2-m'], 'vx2-auto', 'vx2-stop', 'vx2-prog');
+    const GRID = [60, 110, 190, 280, 430, 590, 780, 1000, 1300];   // массы груза привода, г
+    L2.src = 'virtual'; L2.runs = [];
+    if (!V2.on) v2Toggle();
+    for (let i = 0; i < GRID.length && !autoStop; i++) {
+      $('vx2-prog').textContent = `режим ${i + 1} из ${GRID.length}`;
+      $('vx2-m').value = GRID[i];
+      $('vx2-m').dispatchEvent(new Event('input'));
+      // робот выводит тележку на установившийся режим: решаем F = R(v) бисекцией
+      // (в ручном режиме то же самое происходит само за десятки секунд разгона)
+      const Fi = GRID[i] / 1000 * G;
+      let lo = 0, hi = 2.4;
+      for (let k = 0; k < 44; k++) { const mid = (lo + hi) / 2; if (Rv(mid) < Fi) lo = mid; else hi = mid; }
+      V2.v = (lo + hi) / 2;
+      const T0 = performance.now();
+      while (!autoStop && !V2.steady && performance.now() - T0 < 3000) await sleep(100);
+      await sleep(500);
+      if (!autoStop && V2.steady) { $('vx2-snap').disabled = false; v2Snap(); }
+    }
+    if (V2.on) v2Toggle();
+    autoLock(false, ['vx2-go', 'vx2-reset', 'vx2-m'], 'vx2-auto', 'vx2-stop', 'vx2-prog');
+    $('vx2-msg').textContent = autoStop
+      ? `Авто-опыт прерван: снято ${L2.runs.length} режимов — пересчёт идёт по ним.`
+      : `Серия из ${L2.runs.length} режимов снята автоматически; пересчёт по Фруду ниже — от ваших точек.`;
+  });
+  $('vx2-stop').addEventListener('click', () => { autoStop = true; });
+
   $('vx1-go').addEventListener('click', v1Start);
   $('vx1-snap').addEventListener('click', v1Snap);
   $('vx1-reset').addEventListener('click', v1Reset);
