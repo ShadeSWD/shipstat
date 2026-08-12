@@ -1,4 +1,4 @@
-/* «Курсовая»: гидростатика, кривые элементов, остойчивость, ДСО, критерии. */
+/* Решатель: гидростатика, кривые элементов, остойчивость, ДСО, критерии. */
 'use strict';
 
 /* ---------- мини-график (одна серия, ось Y своя, тултип-кросшэйр) ---------- */
@@ -96,7 +96,7 @@ function applyHullParams() {
 }
 
 function drawHullSketch(h) {
-  const B = new Board('#b-hullsketch', { w: 760, h: 340 });
+  const B = new Board('#b-hullsketch', { w: 790, h: 340 });
   B.clear();
   // полуширота (вид сверху) и мидель
   const sx = 40, sy = 90, kx = 3.4, ky = 6;
@@ -201,6 +201,45 @@ function recompute() {
   const hMeta = h.KM - zg;
   miniChartBig(document.getElementById('c-gz'), curve, hMeta);
   criteria(curve, hMeta);
+  solveSteps(h, curve, hMeta, rho);
+}
+
+/* пошаговое решение: формула → подстановка → результат */
+function stepRow(f, sub, res) {
+  return `<div style="margin:5px 0;font:14px system-ui"><span style="color:#3a3a42">${f}</span>` +
+    (sub ? ` = <span style="color:#6b6b74">${sub}</span>` : '') + ` = <b>${res}</b></div>`;
+}
+function solveSteps(h, curve, hMeta, rho) {
+  const el = document.getElementById('solve-steps');
+  if (!el) return;
+  const D = h.V * rho, hh = hMeta;
+  const o = [];
+  o.push('<h4 style="margin:8px 0 2px">Шаг 1. Плавучесть (интегрирование по 41 шпангоуту)</h4>');
+  o.push(stepRow('V = ∫ω(x)dx', `по шпангоутным площадям до T=${fmt(stS.T, 2)} м`, `${fmt(h.V, 0)} м³`));
+  o.push(stepRow('D = ρV', `1,025·${fmt(h.V, 0)}`, `${fmt(D, 0)} т`));
+  o.push(stepRow('q = ρS/100', `1,025·${fmt(h.Awl, 0)}/100`, `${fmt(rho * h.Awl / 100, 1)} т/см`));
+  o.push('<h4 style="margin:8px 0 2px">Шаг 2. Центры и моменты инерции ватерлинии</h4>');
+  o.push(stepRow('x꜀ = ∫ω·x dx / V', `${fmt(h.V * h.xc, 0)}/${fmt(h.V, 0)} = ${fmt(h.xc, 2)} м от НП`, `${fmt(h.xc - HULL.L / 2, 2)} м от миделя`));
+  o.push(stepRow('z꜀ = ∫M_z dx / V', '', `${fmt(h.zc, 2)} м`));
+  o.push(stepRow('Iₓ = ∫⅔y³dx', '', `${fmt(h.Ix, 0)} м⁴`));
+  o.push('<h4 style="margin:8px 0 2px">Шаг 3. Начальная остойчивость</h4>');
+  o.push(stepRow('r = Iₓ/V', `${fmt(h.Ix, 0)}/${fmt(h.V, 0)}`, `${fmt(h.r, 2)} м`));
+  o.push(stepRow('z_m = z꜀ + r', `${fmt(h.zc, 2)} + ${fmt(h.r, 2)}`, `${fmt(h.KM, 2)} м`));
+  o.push(stepRow('h = z_m − z_g', `${fmt(h.KM, 2)} − ${fmt(stS.zg, 2)}`, `<span style="color:${hh > 0.15 ? '#1a7f37' : '#b3382e'}">${fmt(hh, 2)} м</span>`));
+  o.push(stepRow('R = I_yf/V', `${fmt(h.Iyf, 0)}/${fmt(h.V, 0)}`, `${fmt(h.R, 0)} м`));
+  o.push(stepRow('m_д = D·H/(100L)', `${fmt(D, 0)}·${fmt(h.zc + h.R - stS.zg, 0)}/(100·${HULL.L})`, `${fmt(D * (h.zc + h.R - stS.zg) / 100 / HULL.L, 0)} т·м/см`));
+  o.push('<h4 style="margin:8px 0 2px">Шаг 4. ДСО и её контроль</h4>');
+  const l30 = curve.find(c => c.deg === 30);
+  o.push(stepRow('l(30°)', 'наклонение контуров + бисекция уровня по V', `${fmt(l30 ? l30.l : 0, 3)} м`));
+  o.push(stepRow('проверка начального участка: l(5°) ≈ h·θ', `${fmt(hh, 2)}·0,0873`, `${fmt(hh * 5 * Math.PI / 180, 3)} м (на кривой ${fmt(curve.find(c => c.deg === 5)?.l ?? 0, 3)})`));
+  o.push(stepRow('A₃₀ = ∫₀³⁰ l dθ', 'трапециями по кривой', `${fmt(gzArea(curve, 30), 3)} м·рад`));
+  if (hh > 0.02) {
+    o.push('<h4 style="margin:8px 0 2px">Шаг 5. Период качки</h4>');
+    const C = 0.373 + 0.023 * stS.Bh / stS.T - 0.043 * HULL.L / 100;
+    o.push(stepRow('C = 0,373 + 0,023·B/d − 0,043·L/100', `0,373 + 0,023·${fmt(stS.Bh / stS.T, 2)} − 0,043·${fmt(HULL.L / 100, 1)}`, fmt(C, 3)));
+    o.push(stepRow('T_θ = 2C·B/√h', `2·${fmt(C, 3)}·${stS.Bh}/√${fmt(hh, 2)}`, `${fmt(2 * C * stS.Bh / Math.sqrt(hh), 1)} с`));
+  }
+  el.innerHTML = o.join('');
 }
 
 /* большой график ДСО */

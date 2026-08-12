@@ -45,10 +45,26 @@
   <a href="solver">решателя</a> определяет, куда судно дифферентуется при
   простой перегрузке.</p>
 
+  <svg viewBox="0 0 640 220" class="geo-board" style="max-width:640px">
+    <path d="M 80 60 L 560 60 L 545 150 Q 320 178 95 150 Z" fill="rgba(22,22,26,.04)" stroke="#16161a" stroke-width="1.8" transform="rotate(3 320 110)"/>
+    <line x1="40" y1="118" x2="600" y2="118" stroke="#155e75" stroke-width="1.6"/>
+    <text x="46" y="112" style="font:11px system-ui;fill:#155e75">ВЛ</text>
+    <circle cx="352" cy="118" r="4" fill="#1a7f37"/>
+    <text x="344" y="106" style="font:12px system-ui;fill:#1a7f37">F (x_f)</text>
+    <line x1="352" y1="98" x2="352" y2="138" stroke="#1a7f37" stroke-width="1" stroke-dasharray="3 3"/>
+    <line x1="470" y1="40" x2="470" y2="80" stroke="#b3382e" stroke-width="2.2"/>
+    <path d="M 470 84 l -5 -9 l 10 0 z" fill="#b3382e"/>
+    <text x="478" y="52" style="font:12px system-ui;fill:#b3382e">груз m на x</text>
+    <line x1="95" y1="118" x2="95" y2="162" stroke="#6b6b74" stroke-width="1.2"/>
+    <text x="66" y="178" style="font:11px system-ui;fill:#6b6b74">T_к (корма)</text>
+    <line x1="545" y1="118" x2="545" y2="152" stroke="#6b6b74" stroke-width="1.2"/>
+    <text x="516" y="168" style="font:11px system-ui;fill:#6b6b74">T_н (нос)</text>
+    <text x="40" y="210" style="font:11px system-ui;fill:#6b6b74">судно садится «параллельно» вокруг F и поворачивается моментом m·(x − x_f): дифферент d = T_н − T_к</text>
+  </svg>
   <h2>3.4. Диаграмма посадок</h2>
   <p>Для быстрых решений строят диаграмму: по осям T_н и T_к, семейства
   прямых D = const и x_g = const. Любая пара (D, x_g) из таблицы нагрузки
-  даёт точку — посадка считывается без вычислений. В курсовой её заменяют
+  даёт точку — посадка считывается без вычислений. На практике её заменяют
   кривые элементов + формулы этой главы.</p>
   <p><a href="t-initial">← Глава 2</a> · <a href="t-large">Глава 4 →</a></p>
 </main>
