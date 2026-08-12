@@ -32,12 +32,24 @@ function miniChart(host, title, unit, pts, opts = {}) {
     fill: 'none', stroke: opts.color || '#155e75', 'stroke-width': 2,
     'stroke-linejoin': 'round',
   }, svg);
-  // доп. серия (например касательная)
+  // доп. серия (например x_f или z_g) — с прямой подписью на графике
   if (opts.extra) {
     svgEl('polyline', {
       points: opts.extra.map(p => X(p[0]).toFixed(1) + ',' + Y(p[1]).toFixed(1)).join(' '),
       fill: 'none', stroke: '#9a9aa2', 'stroke-width': 1.4, 'stroke-dasharray': '5 4',
     }, svg);
+    if (opts.extraLabel) {
+      const le = opts.extra[opts.extra.length - 1];
+      const t = svgEl('text', { x: X(le[0]) - 4, y: clamp(Y(le[1]) - 5, padT + 9, H - padB - 3), 'text-anchor': 'end' }, svg);
+      t.style.cssText = 'font:600 10px system-ui;fill:#6b6b74;paint-order:stroke;stroke:#ffffffdd;stroke-width:3px';
+      t.textContent = opts.extraLabel;
+    }
+  }
+  if (opts.mainLabel) {
+    const lm = pts[pts.length - 1];
+    const t = svgEl('text', { x: X(lm[0]) - 4, y: clamp(Y(lm[1]) + 12, padT + 9, H - padB - 3), 'text-anchor': 'end' }, svg);
+    t.style.cssText = 'font:600 10px system-ui;fill:' + (opts.color || '#155e75') + ';paint-order:stroke;stroke:#ffffffdd;stroke-width:3px';
+    t.textContent = opts.mainLabel;
   }
   if (opts.marks) {
     for (const m of opts.marks) {
@@ -83,8 +95,8 @@ function applyHullParams() {
   HULL.S[2][1] = stS.bilge;          // высота выхода борта
 }
 
-function drawHullSketch() {
-  const B = new Board('#b-hullsketch', { w: 640, h: 300 });
+function drawHullSketch(h) {
+  const B = new Board('#b-hullsketch', { w: 760, h: 340 });
   B.clear();
   // полуширота (вид сверху) и мидель
   const sx = 40, sy = 90, kx = 3.4, ky = 6;
@@ -98,8 +110,16 @@ function drawHullSketch() {
   }
   B.line([sx, sy], [sx + HULL.L * kx, sy], 'ln-axis');
   B.label([sx + HULL.L * kx - 30, sy - 6], 'ДП (план)', 'gray', 0, 0);
+  if (arguments[0]) {
+    const hh = arguments[0];
+    const xm = sx + HULL.L / 2 * kx, xc = sx + hh.xc * kx;
+    B.line([xm, sy - 12], [xm, sy + 60], 'ln-thin gray ln-dash');
+    B.label([xm - 6, sy + 74], '⊗ мидель', 'gray', 0, 0);
+    B.dot([xc, sy], 'blue', 4);
+    B.label([xc, sy], 'x꜀ = x_f', 'blue', 6, -8);
+  }
   // мидель-шпангоут с осадкой
-  const mx = 470, myb = 285, kk = 14;
+  const mx = 540, myb = 320, kk = 18;
   const sec = [];
   for (let i = 0; i <= 30; i++) {
     const z = i / 30 * HULL.H;
@@ -107,17 +127,41 @@ function drawHullSketch() {
   }
   B.poly(sec, 'ln', 'main');
   B.poly(sec.map(p => [2 * mx - p[0], p[1]]), 'ln', 'main');
-  B.line([mx, myb], [mx, myb - HULL.H * kk], 'ln-thin gray ln-dash');
+  B.line([mx, myb], [mx, myb - (HULL.H + 2) * kk], 'ln-thin gray ln-dash');
   // ватерлиния
   B.line([mx - 9.6 * kk, myb - stS.T * kk], [mx + 9.6 * kk, myb - stS.T * kk], 'ln blue');
   B.label([mx + 9.6 * kk - 22, myb - stS.T * kk - 6], 'ВЛ', 'blue', 0, 0);
-  B.label([mx - 30, myb - HULL.H * kk - 8], 'мидель', 'gray', 0, 0);
+  B.label([mx - 36, myb - (HULL.H + 2) * kk + 2], 'мидель-шпангоут', 'gray', 0, 0);
+  // ключевые точки остойчивости на ДП: C (центр величины), G, m (метацентр)
+  if (h) {
+    const zP = z => myb - z * kk;
+    const pC = [mx, zP(h.zc)], pG = [mx, zP(stS.zg)], pM = [mx, zP(h.KM)];
+    B.dot(pC, 'blue', 4); B.label(pC, 'C', 'blue', 8, 4);
+    B.dot(pG, 'red', 4); B.label(pG, 'G', 'red', 8, 4);
+    B.dot(pM, 'green', 4); B.label(pM, 'm', 'green', 8, -4);
+    // выноска r = Cm слева, h = Gm справа
+    const xr = mx - 9.6 * kk - 28, xh = mx + 9.6 * kk + 14;
+    B.line(pC, [xr, pC[1]], 'ln-link'); B.line(pM, [xr, pM[1]], 'ln-link');
+    B.dim([xr, pC[1]], [xr, pM[1]], 'r=' + fmt(h.r, 2), 0);
+    B.line(pG, [xh, pG[1]], 'ln-link'); B.line(pM, [xh, pM[1]], 'ln-link');
+    if (Math.abs(pG[1] - pM[1]) >= 16) {
+      B.dim([xh, pG[1]], [xh, pM[1]], 'h=' + fmt(h.KM - stS.zg, 2), 0);
+    } else {
+      // отрезок слишком мал для стрелок — скобка с подписью сбоку
+      B.line([xh, pG[1]], [xh, pM[1]], 'ln');
+      B.line([xh - 4, pG[1]], [xh + 4, pG[1]], 'ln-thin');
+      B.line([xh - 4, pM[1]], [xh + 4, pM[1]], 'ln-thin');
+      B.label([xh - 2, pM[1] - 8], 'h=' + fmt(h.KM - stS.zg, 2), '', 0, 0);
+    }
+    // z_c от ОЛ
+    B.label([mx + 10, zP(h.zc / 2)], 'z꜀=' + fmt(h.zc, 2), 'gray', 0, 0);
+  }
 }
 
 function recompute() {
   applyHullParams();
-  drawHullSketch();
   const h = hydrostatics(stS.T);
+  drawHullSketch(h);
   const rho = 1.025;
   document.getElementById('out-table').innerHTML = `
     <tr><td>Объёмное водоизмещение V</td><td>${fmt(h.V, 0)} м³</td></tr>
@@ -145,10 +189,10 @@ function recompute() {
   const mark = [{ x: stS.T, label: 'T' }];
   miniChart(document.getElementById('c-V'), 'Водоизмещение V', 'м³', data.V, { marks: mark });
   miniChart(document.getElementById('c-S'), 'Площадь ВЛ S', 'м²', data.S, { marks: mark });
-  miniChart(document.getElementById('c-xc'), 'x꜀ и x_f от миделя', 'м', data.xc, { extra: data.xf, marks: mark });
+  miniChart(document.getElementById('c-xc'), 'x꜀ и x_f от миделя', 'м', data.xc, { extra: data.xf, marks: mark, mainLabel: 'x꜀', extraLabel: 'x_f' });
   miniChart(document.getElementById('c-zc'), 'Центр величины z꜀', 'м', data.zc, { marks: mark });
   miniChart(document.getElementById('c-r'), 'Метацентрич. радиус r', 'м', data.r, { marks: mark });
-  miniChart(document.getElementById('c-KM'), 'Метацентр z_m', 'м', data.KM, { marks: mark, extra: [[1, stS.zg], [8, stS.zg]] });
+  miniChart(document.getElementById('c-KM'), 'Метацентр z_m и z_g', 'м', data.KM, { marks: mark, extra: [[1, stS.zg], [8, stS.zg]], mainLabel: 'z_m', extraLabel: 'z_g' });
 
   // ДСО
   const V0 = h.V, zg = stS.zg;
