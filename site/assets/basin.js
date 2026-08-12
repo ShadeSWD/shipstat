@@ -574,6 +574,51 @@
   });
   $('vx2-stop').addEventListener('click', () => { autoStop = true; });
 
+  /* ============ Сопротивление на волнении и ветре ============ */
+  {
+    const SEA = { 5: { h: 3.5, w: 14, a: 1.41 }, 6: { h: 6.0, w: 19, a: 1.07 }, 7: { h: 8.5, w: 24, a: 0.90 } };
+    const FA = [[0.90, 3.87e-6], [1.07, 3.98e-6], [1.41, 1.83e-6]];   // f(α) — табличная
+    const fAlpha = a => {
+      if (a <= FA[0][0]) return FA[0][1];
+      for (let i = 1; i < FA.length; i++) {
+        if (a <= FA[i][0]) {
+          const [x0, y0] = FA[i - 1], [x1, y1] = FA[i];
+          return y0 + (y1 - y0) * (a - x0) / (x1 - x0);
+        }
+      }
+      return FA[FA.length - 1][1];
+    };
+    function stormCalc() {
+      const L = +$('st-L').value, B = +$('st-B').value, d = +$('st-d').value,
+        Fr = +$('st-Fr').value, s = SEA[$('st-b').value];
+      const rho = 1.025, g = 9.81;
+      const Cs = 2.77e5 * rho * g * B * B / Math.pow(L, 1.5) * (1 + 4.4 * d);
+      const fa = fAlpha(s.a);
+      const Raw = Cs * Math.pow(Fr, 0.687) * Math.pow(s.h, 2.5) * fa;
+      const v = Fr * Math.sqrt(g * L);
+      const Va = v + s.w;
+      const Raa = 1.08e-3 * L * Va * Va;
+      const o = [];
+      o.push(stepRow('C_s = 2,77·10⁵·ρgB²/L^1,5·(1+4,4δ)',
+        `2,77·10⁵·${fmt(rho, 3)}·9,81·${fmt(B, 1)}²/${fmt(L, 1)}^1,5·(1+4,4·${fmt(d, 3)})`,
+        `${fmt(Cs, 0)} кН/м^2,5`));
+      o.push(stepRow('скорость: v = Fr·√(gL)', `${fmt(Fr, 2)}·√(9,81·${fmt(L, 1)})`, `${fmt(v, 2)} м/с`));
+      o.push(stepRow('f(α) по таблице', `α = ${fmt(s.a, 2)}`, fa.toExponential(2)));
+      o.push(stepRow('R_AW = C_s·Fr^0,687·h^2,5·f(α)',
+        `${fmt(Cs, 0)}·${fmt(Fr, 2)}^0,687·${fmt(s.h, 1)}^2,5·${fa.toExponential(2)}`,
+        `${fmt(Raw, 2)} кН`));
+      o.push(stepRow('V_A = v + скорость ветра', `${fmt(v, 2)} + ${fmt(s.w, 0)}`, `${fmt(Va, 2)} м/с`));
+      o.push(stepRow('R_AA = 1,08·10⁻³·L·V_A²',
+        `1,08·10⁻³·${fmt(L, 1)}·${fmt(Va, 2)}²`, `${fmt(Raa, 1)} кН`));
+      o.push(stepRow('добавка к сопротивлению R_AW + R_AA', `${fmt(Raw, 1)} + ${fmt(Raa, 1)}`,
+        `<b>${fmt(Raw + Raa, 1)} кН</b>`));
+      $('st-out').innerHTML = `<div class="note tip">${o.join('')}</div>`;
+    }
+    ['st-L', 'st-B', 'st-d', 'st-Fr'].forEach(id => $(id).addEventListener('input', stormCalc));
+    $('st-b').addEventListener('change', stormCalc);
+    stormCalc();
+  }
+
   /* ================= Опыт кренования модели ================= */
   {
     // учебный пример: 8 перекладок груза, отсчёты двух отвесов
