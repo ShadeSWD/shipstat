@@ -6,6 +6,28 @@
 <title>Критерии остойчивости второго поколения (SGISC) — живая проверка</title>
 <meta name="description" content="SGISC MSC.1/Circ.1627: пять отказных режимов, живой калькулятор уровня 1 для чистой потери остойчивости и параметрической качки, разбор аварии Maersk Essen и открытые проблемы области.">
 <link rel="stylesheet" href="assets/style.css">
+<style>
+/* схемы отказных режимов и фигура уровня 1 */
+.fm { display: flex; gap: 10px 26px; flex-wrap: wrap; align-items: center; margin: 12px 0 26px; }
+.fm-txt { flex: 1 1 270px; min-width: 250px; }
+.fm-txt h3 { margin: 0 0 4px; }
+.fm-txt p { margin: 0; font-size: 15px; }
+svg.fm-fig { flex: 1 1 380px; min-width: 280px; max-width: 640px; height: auto;
+  background: #fff; border: 1px solid var(--line); border-radius: 10px; }
+svg.fm-fig text, #sg-fig text { font: 11px system-ui, sans-serif; fill: #16161a;
+  paint-order: stroke; stroke: #fff; stroke-width: 2.5px; stroke-linejoin: round; }
+.fg-mut { fill: #6b6b74 !important; } .fg-red { fill: #b3382e !important; }
+.fg-teal { fill: #155e75 !important; } .fg-grn { fill: #1a7f37 !important; }
+.fg-b { font-weight: 600; }
+.sk-i { stroke: #16161a; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.sk-t { stroke: #155e75; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.sk-r { stroke: #b3382e; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.sk-g { stroke: #1a7f37; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.sk-m { stroke: #6b6b74; fill: none; stroke-width: 1; stroke-linecap: round; }
+.sk-dsh { stroke-dasharray: 6 5; } .sk-w1 { stroke-width: 1; } .sk-w25 { stroke-width: 2.5; }
+#sg-fig { width: 100%; max-width: 640px; height: auto; display: block; background: #fff;
+  border: 1px solid var(--line); border-radius: 10px; margin: 12px 0 0; }
+</style>
 </head>
 <body>
 <main class="wrap">
@@ -19,17 +41,187 @@
   корабля — и уровень 1 двух главных режимов можно посчитать прямо здесь.</p>
 
   <h2>Пять отказных режимов</h2>
-  <ul>
-    <li><b>Pure loss of stability</b> — чистая потеря остойчивости: на гребне
-    попутной волны ватерлиния сужается, I<sub>x</sub> падает, GM уходит в ноль;</li>
-    <li><b>Parametric rolling</b> — параметрическая качка: GM колеблется с
-    частотой волны, и при \(T_E \approx T_\theta/2\) крен раскачивается до
-    десятков градусов (главный убийца контейнеровозов);</li>
-    <li><b>Surf-riding / broaching</b> — захват волной и разворот лагом;</li>
-    <li><b>Dead ship condition</b> — обесточенное судно лагом к волне;</li>
-    <li><b>Excessive accelerations</b> — чрезмерные ускорения при излишне
-    высоком GM.</li>
-  </ul>
+
+  <div class="fm">
+    <div class="fm-txt">
+      <h3>1. Pure loss of stability</h3>
+      <p><b>Чистая потеря остойчивости</b>: судно бежит на попутной волне длиной
+      λ ≈ L, и гребень надолго «зависает» на миделе. Вода в оконечностях уходит
+      к подошвам — действующая ватерлиния резко сужается в носу и корме, её
+      момент инерции I<sub>x</sub> падает, а с ним и метацентрическая высота:
+      GM уходит в ноль и судно медленно валится на борт.</p>
+    </div>
+    <svg class="fm-fig" viewBox="0 0 640 280" role="img" aria-label="Схема pure loss of stability: судно на гребне попутной волны и сравнение ватерлиний">
+      <defs>
+        <marker id="aI" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0L9,3.5L0,7z" fill="#16161a"/></marker>
+        <marker id="aT" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0L9,3.5L0,7z" fill="#155e75"/></marker>
+        <marker id="aR" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0L9,3.5L0,7z" fill="#b3382e"/></marker>
+        <marker id="aG" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0L9,3.5L0,7z" fill="#1a7f37"/></marker>
+        <marker id="aM" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0L9,3.5L0,7z" fill="#6b6b74"/></marker>
+        <marker id="aMs" markerWidth="9" markerHeight="7" refX="1" refY="3.5" orient="auto"><path d="M9,0L0,3.5L9,7z" fill="#6b6b74"/></marker>
+        <marker id="aRs" markerWidth="9" markerHeight="7" refX="1" refY="3.5" orient="auto"><path d="M9,0L0,3.5L9,7z" fill="#b3382e"/></marker>
+      </defs>
+      <path fill="rgba(21,94,117,.08)" d="M20,90 L30,93.4 L40,96.8 L50,100 L60,102.9 L70,105.6 L80,107.8 L90,109.6 L100,110.9 L110,111.7 L120,112 L130,111.7 L140,110.9 L150,109.6 L160,107.8 L170,105.6 L180,102.9 L190,100 L200,96.8 L210,93.4 L220,90 L230,86.6 L240,83.2 L250,80 L260,77.1 L270,74.4 L280,72.2 L290,70.4 L300,69.1 L310,68.3 L320,68 L330,68.3 L340,69.1 L350,70.4 L360,72.2 L370,74.4 L380,77.1 L390,80 L400,83.2 L410,86.6 L420,90 L430,93.4 L440,96.8 L450,100 L460,102.9 L470,105.6 L480,107.8 L490,109.6 L500,110.9 L510,111.7 L520,112 L530,111.7 L540,110.9 L550,109.6 L560,107.8 L570,105.6 L580,102.9 L590,100 L600,96.8 L610,93.4 L620,90 L620,150 L20,150 Z"/>
+      <path class="sk-i" fill="#fff" d="M140,52 L524,52 L500,96 L140,96 Z"/>
+      <path class="sk-i" fill="#fff" d="M296,52 L296,36 L372,36 L372,52"/>
+      <path class="sk-t" d="M20,90 L30,93.4 L40,96.8 L50,100 L60,102.9 L70,105.6 L80,107.8 L90,109.6 L100,110.9 L110,111.7 L120,112 L130,111.7 L140,110.9 L150,109.6 L160,107.8 L170,105.6 L180,102.9 L190,100 L200,96.8 L210,93.4 L220,90 L230,86.6 L240,83.2 L250,80 L260,77.1 L270,74.4 L280,72.2 L290,70.4 L300,69.1 L310,68.3 L320,68 L330,68.3 L340,69.1 L350,70.4 L360,72.2 L370,74.4 L380,77.1 L390,80 L400,83.2 L410,86.6 L420,90 L430,93.4 L440,96.8 L450,100 L460,102.9 L470,105.6 L480,107.8 L490,109.6 L500,110.9 L510,111.7 L520,112 L530,111.7 L540,110.9 L550,109.6 L560,107.8 L570,105.6 L580,102.9 L590,100 L600,96.8 L610,93.4 L620,90"/>
+      <path class="sk-t" marker-end="url(#aT)" d="M32,32 L88,32"/>
+      <text class="fg-teal" x="96" y="36">волна</text>
+      <path class="sk-i" marker-end="url(#aI)" d="M536,68 L592,68"/>
+      <text x="536" y="60">V судна</text>
+      <path class="sk-m" marker-start="url(#aMs)" marker-end="url(#aM)" d="M120,135 L520,135"/>
+      <text class="fg-mut" x="320" y="149" text-anchor="middle">λ = L, гребень на миделе</text>
+      <path class="sk-m sk-dsh" d="M70,229 L570,229"/>
+      <path class="sk-g" d="M80,229 C90,206 150,199 260,199 C380,199 480,206 540,229 C480,252 380,259 260,259 C150,259 90,252 80,229 Z"/>
+      <path class="sk-r" d="M110,229 C112,218 170,207 265,207 C370,207 470,218 515,229 C470,240 370,251 265,251 C170,251 112,240 110,229 Z"/>
+      <text class="fg-grn" x="84" y="192">ватерлиния на тихой воде — широкая</text>
+      <text class="fg-red" x="312" y="247" text-anchor="middle">на гребне: узкая в оконечностях</text>
+      <path class="sk-r sk-w1" marker-end="url(#aR)" d="M562,212 L524,222"/>
+      <text class="fg-red fg-b" x="634" y="205" text-anchor="end">I<tspan font-size="8" dy="2">x</tspan><tspan dy="-2"> падает</tspan></text>
+      <text class="fg-red fg-b" x="634" y="220" text-anchor="end">→ GM → 0</text>
+    </svg>
+  </div>
+
+  <div class="fm">
+    <div class="fm-txt">
+      <h3>2. Parametric rolling</h3>
+      <p><b>Параметрическая качка</b>: на волнении GM не постоянна — она
+      колеблется с частотой набегания волн (на гребне меньше, на подошве
+      больше). Если период набегания попадает в резонанс \(T_E \approx
+      T_\theta/2\), каждое «подкачивание» GM приходится в такт собственной
+      качке — и крен нарастает цикл за циклом до десятков градусов. Главный
+      убийца контейнеровозов.</p>
+    </div>
+    <svg class="fm-fig" viewBox="0 0 640 300" role="img" aria-label="Схема параметрической качки: колебания GM(t) и нарастающий крен θ(t)">
+      <path class="sk-m" d="M50,130 L50,38"/>
+      <path class="sk-m" marker-end="url(#aM)" d="M50,130 L622,130"/>
+      <text class="fg-mut" x="630" y="126" text-anchor="end">t</text>
+      <path class="sk-m sk-dsh" d="M50,75 L590,75"/>
+      <text class="fg-mut" x="44" y="79" text-anchor="end">GM</text>
+      <path class="sk-t" d="M50,59 L56,60.4 L62,64.3 L68,70.1 L74,76.7 L80,83 L86,87.9 L92,90.7 L98,90.7 L104,87.9 L110,83 L116,76.7 L122,70.1 L128,64.3 L134,60.4 L140,59 L146,60.4 L152,64.3 L158,70.1 L164,76.7 L170,83 L176,87.9 L182,90.7 L188,90.7 L194,87.9 L200,83 L206,76.7 L212,70.1 L218,64.3 L224,60.4 L230,59 L236,60.4 L242,64.3 L248,70.1 L254,76.7 L260,83 L266,87.9 L272,90.7 L278,90.7 L284,87.9 L290,83 L296,76.7 L302,70.1 L308,64.3 L314,60.4 L320,59 L326,60.4 L332,64.3 L338,70.1 L344,76.7 L350,83 L356,87.9 L362,90.7 L368,90.7 L374,87.9 L380,83 L386,76.7 L392,70.1 L398,64.3 L404,60.4 L410,59 L416,60.4 L422,64.3 L428,70.1 L434,76.7 L440,83 L446,87.9 L452,90.7 L458,90.7 L464,87.9 L470,83 L476,76.7 L482,70.1 L488,64.3 L494,60.4 L500,59 L506,60.4 L512,64.3 L518,70.1 L524,76.7 L530,83 L536,87.9 L542,90.7 L548,90.7 L554,87.9 L560,83 L566,76.7 L572,70.1 L578,64.3 L584,60.4 L590,59"/>
+      <text class="fg-teal fg-b" x="58" y="34">GM(t) — метацентрическая высота на волне</text>
+      <path class="sk-m" marker-start="url(#aMs)" marker-end="url(#aM)" d="M50,48 L140,48"/>
+      <text class="fg-mut" x="95" y="44" text-anchor="middle">T<tspan font-size="8" dy="2">E</tspan></text>
+      <path class="sk-r sk-w1" marker-start="url(#aRs)" marker-end="url(#aR)" d="M600,59 L600,75"/>
+      <text class="fg-red" x="606" y="70">δGM₁</text>
+      <path class="sk-m sk-dsh" opacity=".7" d="M95,93 L95,196"/>
+      <path class="sk-m sk-dsh" opacity=".7" d="M185,93 L185,224"/>
+      <path class="sk-m sk-dsh" opacity=".7" d="M275,93 L275,180"/>
+      <path class="sk-m" d="M50,265 L50,155"/>
+      <path class="sk-m" marker-end="url(#aM)" d="M50,265 L622,265"/>
+      <text class="fg-mut" x="630" y="261" text-anchor="end">t</text>
+      <path class="sk-m sk-dsh" d="M50,210 L590,210"/>
+      <text class="fg-mut" x="44" y="214" text-anchor="end">0</text>
+      <path class="sk-r sk-w1 sk-dsh" opacity=".65" d="M50,204 L590,161.4"/>
+      <path class="sk-r sk-w1 sk-dsh" opacity=".65" d="M50,216 L590,258.6"/>
+      <path class="sk-r" d="M50,210 L56,208.6 L62,207.1 L68,205.5 L74,203.9 L80,202.5 L86,201.2 L92,200.3 L98,199.7 L104,199.7 L110,200.1 L116,201.1 L122,202.7 L128,204.7 L134,207.2 L140,210 L146,213 L152,216.2 L158,219.2 L164,222.1 L170,224.5 L176,226.5 L182,227.8 L188,228.3 L194,228 L200,226.9 L206,224.9 L212,222.1 L218,218.6 L224,214.5 L230,210 L236,205.3 L242,200.5 L248,196 L254,191.9 L260,188.4 L266,185.8 L272,184.2 L278,183.6 L284,184.3 L290,186.1 L296,189.1 L302,193.1 L308,198.1 L314,203.8 L320,210 L326,216.4 L332,222.8 L338,228.8 L344,234.1 L350,238.6 L356,241.9 L362,243.9 L368,244.4 L374,243.4 L380,240.9 L386,236.9 L392,231.6 L398,225.2 L404,217.9 L410,210 L416,201.9 L422,193.9 L428,186.5 L434,179.9 L440,174.4 L446,170.4 L452,168.1 L458,167.5 L464,168.9 L470,172.1 L476,177 L482,183.6 L488,191.5 L494,200.4 L500,210 L506,219.8 L512,229.4 L518,238.3 L524,246.2 L530,252.6 L536,257.3 L542,260 L548,260.5 L554,258.8 L560,254.9 L566,249 L572,241.1 L578,231.8 L584,221.2 L590,210"/>
+      <text class="fg-red fg-b" x="58" y="152">θ(t) — крен: раскачка нарастает</text>
+      <path class="sk-m" marker-start="url(#aMs)" marker-end="url(#aM)" d="M95,168 L275,168"/>
+      <text class="fg-mut" x="185" y="164" text-anchor="middle">T<tspan font-size="8" dy="2">θ</tspan><tspan dy="-2"> = 2·T</tspan><tspan font-size="8" dy="2">E</tspan></text>
+      <text class="fg-mut" x="320" y="292" text-anchor="middle">T<tspan font-size="8" dy="2">E</tspan><tspan dy="-2"> ≈ T</tspan><tspan font-size="8" dy="2">θ</tspan><tspan dy="-2">/2 — GM «подкачивает» крен каждый второй цикл, амплитуда растёт</tspan></text>
+    </svg>
+  </div>
+
+  <div class="fm">
+    <div class="fm-txt">
+      <h3>3. Surf-riding / broaching</h3>
+      <p><b>Захват волной и брочинг</b>: на попутном волнении быстроходное судно
+      «седлает» передний склон волны и разгоняется до её скорости (surf-riding).
+      На склоне руль и обтекание кормы работают плохо — судно резко приводится
+      и разворачивается лагом к волне (broaching), получая опасный динамический
+      крен. Проверка обязательна при Fn &gt; 0,3.</p>
+    </div>
+    <svg class="fm-fig" viewBox="0 0 640 240" role="img" aria-label="Схема surf-riding и брочинга: вид сверху, захват на склоне волны и разворот лагом">
+      <path class="sk-t sk-w25" opacity=".55" d="M150,44 L150,210"/>
+      <path class="sk-t sk-w25" opacity=".55" d="M350,44 L350,210"/>
+      <path class="sk-t sk-w25" opacity=".55" d="M550,44 L550,210"/>
+      <path class="sk-t sk-w1 sk-dsh" opacity=".5" d="M250,44 L250,210"/>
+      <path class="sk-t sk-w1 sk-dsh" opacity=".5" d="M450,44 L450,210"/>
+      <text class="fg-teal" x="150" y="36" text-anchor="middle">гребень</text>
+      <text class="fg-mut" x="250" y="36" text-anchor="middle">подошва</text>
+      <text class="fg-teal" x="350" y="36" text-anchor="middle">гребень</text>
+      <path class="sk-t" marker-end="url(#aT)" d="M40,20 L104,20"/>
+      <text class="fg-teal" x="112" y="24">бег волны</text>
+      <g transform="translate(200,120)">
+        <path class="sk-i" fill="#fff" d="M-35,-9 L12,-9 Q35,-5 35,0 Q35,5 12,9 L-35,9 Q-39,0 -35,-9 Z"/>
+      </g>
+      <text class="fg-mut" x="200" y="150" text-anchor="middle">захват на склоне: V ≈ c волны</text>
+      <path class="sk-g sk-dsh" marker-end="url(#aG)" d="M240,120 L340,120"/>
+      <text class="fg-grn" x="290" y="112" text-anchor="middle">заданный курс</text>
+      <path class="sk-r" marker-end="url(#aR)" d="M235,120 C300,125 380,123 415,113 C438,107 458,140 455,118"/>
+      <g transform="translate(455,75) rotate(-90)">
+        <path class="sk-r" fill="#fff" d="M-35,-9 L12,-9 Q35,-5 35,0 Q35,5 12,9 L-35,9 Q-39,0 -35,-9 Z"/>
+      </g>
+      <text class="fg-red fg-b" x="472" y="56">разворот лагом</text>
+      <text class="fg-red" x="472" y="70">(брочинг)</text>
+      <text class="fg-mut" x="320" y="228" text-anchor="middle">на склоне руль теряет эффективность — судно резко приводится лагом к волне</text>
+    </svg>
+  </div>
+
+  <div class="fm">
+    <div class="fm-txt">
+      <h3>4. Dead ship condition</h3>
+      <p><b>Обесточенное судно</b>: после потери хода и электроэнергии судно
+      неуправляемо и само становится лагом (бортом) к волне и ветру. Шквал
+      кренит его на подветренный борт, а бортовая качка в резонансе с волной
+      раскачивает дальше — классический сценарий погодного критерия, но теперь
+      в вероятностной постановке.</p>
+    </div>
+    <svg class="fm-fig" viewBox="0 0 640 240" role="img" aria-label="Схема dead ship: судно лагом к волне и ветру, крен на подветренный борт">
+      <path fill="rgba(21,94,117,.08)" d="M20,167.5 L30,168.6 L40,168.3 L50,166.3 L60,162.4 L70,156.9 L80,150 L90,142.2 L100,134.3 L110,127 L120,121.1 L130,117.3 L140,116 L150,117.3 L160,121.1 L170,127 L180,134.3 L190,142.2 L200,150 L210,156.9 L220,162.4 L230,166.3 L240,168.3 L250,168.6 L260,167.5 L270,165.3 L280,162.4 L290,159.2 L300,155.9 L310,152.8 L320,150 L330,147.7 L340,145.8 L350,144.5 L360,143.6 L370,143.2 L380,143.2 L390,143.6 L400,144.4 L410,145.5 L420,146.9 L430,148.4 L440,150 L450,151.6 L460,153 L470,154.3 L480,155.2 L490,155.8 L500,156 L510,155.8 L520,155.2 L530,154.2 L540,153 L550,151.6 L560,150 L570,148.4 L580,147 L590,145.8 L600,144.8 L610,144.2 L620,144 L620,232 L20,232 Z"/>
+      <g transform="translate(420,150) rotate(15)">
+        <path class="sk-i" fill="#fff" d="M-70,-35 L-70,18 Q-70,52 -28,52 L28,52 Q70,52 70,18 L70,-35 Z"/>
+        <path class="sk-i" fill="#fff" d="M-32,-35 L-32,-72 L32,-72 L32,-35"/>
+        <path class="sk-i" d="M0,-72 L0,-115"/>
+      </g>
+      <path class="sk-t" d="M20,167.5 L30,168.6 L40,168.3 L50,166.3 L60,162.4 L70,156.9 L80,150 L90,142.2 L100,134.3 L110,127 L120,121.1 L130,117.3 L140,116 L150,117.3 L160,121.1 L170,127 L180,134.3 L190,142.2 L200,150 L210,156.9 L220,162.4 L230,166.3 L240,168.3 L250,168.6 L260,167.5 L270,165.3 L280,162.4 L290,159.2 L300,155.9 L310,152.8 L320,150 L330,147.7 L340,145.8 L350,144.5 L360,143.6 L370,143.2 L380,143.2 L390,143.6 L400,144.4 L410,145.5 L420,146.9 L430,148.4 L440,150 L450,151.6 L460,153 L470,154.3 L480,155.2 L490,155.8 L500,156 L510,155.8 L520,155.2 L530,154.2 L540,153 L550,151.6 L560,150 L570,148.4 L580,147 L590,145.8 L600,144.8 L610,144.2 L620,144"/>
+      <path class="sk-m" stroke-width="1.4" marker-end="url(#aM)" d="M30,55 L118,55"/>
+      <path class="sk-m" stroke-width="1.4" marker-end="url(#aM)" d="M30,75 L118,75"/>
+      <path class="sk-m" stroke-width="1.4" marker-end="url(#aM)" d="M30,95 L118,95"/>
+      <text class="fg-mut fg-b" x="30" y="44">ветер</text>
+      <text class="fg-teal" x="140" y="106" text-anchor="middle">волна лагом</text>
+      <path class="sk-m sk-dsh" d="M420,150 L420,52"/>
+      <path class="sk-r sk-w1" marker-end="url(#aR)" d="M420,84 A66,66 0 0 1 437,86"/>
+      <text class="fg-red fg-b" x="424" y="76">θ</text>
+      <path class="sk-m" marker-end="url(#aM)" d="M510,120 L558,120"/>
+      <text class="fg-mut" x="512" y="112">дрейф</text>
+      <text class="fg-mut" x="320" y="228" text-anchor="middle">без хода судно само становится лагом: ветровой кренящий момент + резонансная качка</text>
+    </svg>
+  </div>
+
+  <div class="fm">
+    <div class="fm-txt">
+      <h3>5. Excessive accelerations</h3>
+      <p><b>Чрезмерные ускорения</b>: обратная сторона «слишком остойчивого»
+      судна. Большая GM — это резкая, короткопериодная качка: высоко
+      расположенные точки (мостик, верхние ярусы контейнеров) мотает с
+      поперечным ускорением \(a \approx h\,\ddot\theta\), опасным для людей и
+      креплений груза. Остойчивости не бывает «чем больше, тем лучше».</p>
+    </div>
+    <svg class="fm-fig" viewBox="0 0 640 240" role="img" aria-label="Схема excessive accelerations: резкая качка судна с большим GM и ускорение на мостике">
+      <path fill="rgba(21,94,117,.08)" d="M20,167.5 L32,167 L44,167.5 L56,168.7 L68,170.4 L80,172 L92,172.9 L104,172.9 L116,171.9 L128,170.3 L140,168.6 L152,167.4 L164,167 L176,167.6 L188,169 L200,170.7 L212,172.2 L224,173 L236,172.8 L248,171.6 L260,170 L272,168.4 L284,167.2 L296,167 L308,167.8 L320,169.3 L332,171 L344,172.4 L356,173 L368,172.6 L380,171.4 L392,169.7 L404,168.1 L416,167.1 L428,167.1 L440,168 L452,169.6 L464,171.3 L476,172.5 L488,173 L500,172.5 L512,171.1 L524,169.4 L536,167.9 L548,167.1 L560,167.2 L572,168.2 L584,169.9 L596,171.5 L608,172.7 L620,173 L620,232 L20,232 Z"/>
+      <g transform="translate(320,170) rotate(13)" opacity=".5">
+        <path class="sk-m sk-dsh" d="M-70,-35 L-70,18 Q-70,52 -28,52 L28,52 Q70,52 70,18 L70,-35 Z"/>
+        <path class="sk-m sk-dsh" d="M-32,-35 L-32,-72 L32,-72 L32,-35"/>
+        <path class="sk-m sk-dsh" d="M0,-72 L0,-130"/>
+      </g>
+      <g transform="translate(320,170) rotate(-13)">
+        <path class="sk-i" fill="#fff" d="M-70,-35 L-70,18 Q-70,52 -28,52 L28,52 Q70,52 70,18 L70,-35 Z"/>
+        <path class="sk-i" fill="#fff" d="M-32,-35 L-32,-72 L32,-72 L32,-35"/>
+        <path class="sk-i" d="M0,-72 L0,-130"/>
+      </g>
+      <path class="sk-t sk-w1" d="M20,167.5 L32,167 L44,167.5 L56,168.7 L68,170.4 L80,172 L92,172.9 L104,172.9 L116,171.9 L128,170.3 L140,168.6 L152,167.4 L164,167 L176,167.6 L188,169 L200,170.7 L212,172.2 L224,173 L236,172.8 L248,171.6 L260,170 L272,168.4 L284,167.2 L296,167 L308,167.8 L320,169.3 L332,171 L344,172.4 L356,173 L368,172.6 L380,171.4 L392,169.7 L404,168.1 L416,167.1 L428,167.1 L440,168 L452,169.6 L464,171.3 L476,172.5 L488,173 L500,172.5 L512,171.1 L524,169.4 L536,167.9 L548,167.1 L560,167.2 L572,168.2 L584,169.9 L596,171.5 L608,172.7 L620,173"/>
+      <circle cx="290.8" cy="43.4" r="3.5" fill="#b3382e"/>
+      <path class="sk-r" marker-end="url(#aR)" d="M285,43 L225,43"/>
+      <text class="fg-red fg-b" x="220" y="36" text-anchor="end">a ≈ h·θ̈</text>
+      <path class="sk-r sk-w1" marker-start="url(#aRs)" marker-end="url(#aR)" d="M296,36 A60,60 0 0 1 344,36"/>
+      <text class="fg-red" x="320" y="24" text-anchor="middle">резкая качка — малый T<tspan font-size="8" dy="2">θ</tspan></text>
+      <path class="sk-m" marker-start="url(#aMs)" marker-end="url(#aM)" d="M408,168 L408,46"/>
+      <path class="sk-m sk-w1" stroke-dasharray="3 3" opacity=".6" d="M294,43.4 L406,43.4"/>
+      <text class="fg-mut fg-b" x="414" y="110">h</text>
+      <text class="fg-mut" x="320" y="228" text-anchor="middle">слишком большой GM → короткий период качки → большие поперечные ускорения наверху</text>
+    </svg>
+  </div>
 
   <h2>Живая проверка уровня 1</h2>
   <p>Формулы циркуляра, посчитанные честной гидростатикой нашего параметрического
@@ -44,6 +236,17 @@
       <label>скуловые кили A<sub>k</sub>, м² <input type="range" id="sg-ak" min="0" max="30" step="1" value="6"><span class="readout" id="sg-ak-o"></span></label>
       <label>C<sub>m</sub> <input type="range" id="sg-cm" min="0.9" max="0.995" step="0.005" value="0.98"><span class="readout" id="sg-cm-o"></span></label>
     </div>
+    <svg id="sg-fig" viewBox="0 0 640 320" role="img" aria-label="Мидель-шпангоут с тремя ватерлиниями: тихая вода d, гребень d_L, подошва d_H"></svg>
+    <p class="small" style="margin:8px 0 4px">На схеме — мидель-шпангоут нашего корпуса и три
+    ватерлинии: тихая вода <b>d</b> (чёрная), посадка «на гребень» <b>d<sub>L</sub></b>
+    (красная; для pure loss волна круче, s<sub>w</sub> = 0,0334) и посадка «на подошву»
+    <b>d<sub>H</sub></b> (синяя, s<sub>w</sub> = 0,0167). Узкой ватерлинии на гребне отвечает
+    малый момент инерции I<sub>TL</sub> — метацентр опускается из M к M′:
+    \(GM_{\min} = KB + I_{TL}/\nabla - KG\) = <b id="sg-f-gmmin">…</b>.
+    Размах колебаний GM между подошвой и гребнем даёт
+    \(\delta GM_1 = (I_{TH} - I_{TL})/(2\nabla)\) = <b id="sg-f-dgm1">…</b>
+    (для parametric roll обе осадки берутся при s<sub>w</sub> = 0,0167).
+    Все числа на схеме живые — двигайте ползунки d и KG.</p>
     <table style="width:100%;border-collapse:collapse;font:14px system-ui">
       <tbody id="sg-out"></tbody>
     </table>

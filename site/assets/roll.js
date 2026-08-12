@@ -4,6 +4,14 @@
   const G = 9.81, RHO = 1.025;
   const $ = id => document.getElementById(id);
 
+  /* ---------- данные, переданные по URL (из бассейна или из расчёта посадки) ---------- */
+  const Q = new URLSearchParams(location.search);
+  const qn = k => { const v = parseFloat(Q.get(k)); return isFinite(v) ? v : null; };
+  const OVR = {
+    Ttheta: (qn('Ttheta') > 0.01) ? qn('Ttheta') : null, // период из опыта, с
+    nu2: (qn('nu2') > 0) ? qn('nu2') : null,             // 2ν_θ из опыта, 1/с
+  };
+
   /* ---------- форматирование ---------- */
   function fmt(v, d = 2) {
     if (!isFinite(v)) return '—';
@@ -160,6 +168,13 @@
       ? { wt2: c.wt2 * CAL.wt2, nu2: c.nu2 * CAL.nu2, lamBar: c.lamBar * CAL.lamBar, Rb: c.Rb * CAL.Rb, nu2k: c.nu2k * CAL.nu2k }
       : { wt2: c.wt2, nu2: c.nu2, lamBar: c.lamBar, Rb: c.Rb, nu2k: c.nu2k };
     K.wt = Math.sqrt(K.wt2);
+    /* переопределения из опыта в бассейне (переданы по URL) — применяются поверх режима формул */
+    if (OVR.Ttheta != null) {
+      K.wt = 2 * Math.PI / OVR.Ttheta;
+      K.wt2 = K.wt * K.wt;
+      K.nu2k = 0.3 * K.wt * Math.sqrt(c.w1); // демпфирование килей следует за новой ω_θ
+    }
+    if (OVR.nu2 != null) K.nu2 = OVR.nu2;
     const fns = makeFns(K, mode === 'work');
 
     /* шаг 1 — постоянные */
@@ -176,9 +191,22 @@
     o.push(stepRow('λ̄₄₄ = λ₄₄/(J_xx + λ₄₄)', `${fmt(c.lam44, 0)}/${fmt(c.Jxx + c.lam44, 0)}`, fmt(c.lamBar, 4)));
     o.push(stepRow("ρ_x′ = √((J_xx+λ₄₄)/ρV)", `√(${fmt(c.Jxx + c.lam44, 0)}/${fmt(RHO * p.V, 0)})`, `${fmt(c.rxp, 2)} м`));
     o.push('<h4 style="margin:8px 0 2px">Шаг 3. Собственная частота и демпфирование</h4>');
-    o.push(stepRow('ω_θ = √(D·h₀/(J_xx + λ₄₄))', `√(${fmt(c.D, 0)}·${fmt(c.h0, 2)}/${fmt(c.Jxx + c.lam44, 0)})`, `${fmt(c.wt, 3)} 1/с`, 'r-wt'));
+    const expBadge = ' <span class="badge ok" style="font-size:12px">задано из опыта в бассейне</span>';
+    if (OVR.Ttheta != null) {
+      o.push(stepRow('ω_θ = 2π/T_θ', `6,28/${fmt(OVR.Ttheta, 2)}`, `${fmt(K.wt, 3)} 1/с`, 'r-wt')
+        .replace('</div>', expBadge + '</div>') +
+        `<div class="small" style="margin:0 0 5px">расчётное значение ω_θ = √(D·h₀/(J_xx + λ₄₄)) = ${fmt(c.wt, 3)} 1/с заменено экспериментальным</div>`);
+    } else {
+      o.push(stepRow('ω_θ = √(D·h₀/(J_xx + λ₄₄))', `√(${fmt(c.D, 0)}·${fmt(c.h0, 2)}/${fmt(c.Jxx + c.lam44, 0)})`, `${fmt(c.wt, 3)} 1/с`, 'r-wt'));
+    }
     o.push(stepRow("ω̃ = 0,24 + 1,42·(h₀/B)·[αB(1+B/(6T))/(4ρ_x′)]²", `0,24 + 1,42·${fmt(c.h0 / p.B, 3)}·${fmt(Math.pow(c.aB / (4 * c.rxp), 2), 3)}`, fmt(c.wTilde, 3)));
-    o.push(stepRow('2ν_θ = 0,3·ω_θ·√ω̃', `0,3·${fmt(c.wt, 3)}·√${fmt(c.wTilde, 3)}`, fmt(c.nu2, 3), 'r-nu2'));
+    if (OVR.nu2 != null) {
+      o.push(stepRow('2ν_θ', 'по осциллограмме затуханий: 2ν_θ = 2ν̄_θ·ω_θ', fmt(K.nu2, 3), 'r-nu2')
+        .replace('</div>', expBadge + '</div>') +
+        `<div class="small" style="margin:0 0 5px">расчётное значение 2ν_θ = 0,3·ω_θ·√ω̃ = ${fmt(c.nu2, 3)} заменено экспериментальным</div>`);
+    } else {
+      o.push(stepRow('2ν_θ = 0,3·ω_θ·√ω̃', `0,3·${fmt(c.wt, 3)}·√${fmt(c.wTilde, 3)}`, fmt(c.nu2, 3), 'r-nu2'));
+    }
     o.push('<h4 style="margin:8px 0 2px">Шаг 4. Редукционный коэффициент</h4>');
     o.push(stepRow('R̄ = χ·√[ ((BTχr)/h₀)^0,5 / (2πg) ]', `${fmt(c.chi, 2)}·√(${fmt(Math.sqrt(p.B * p.T * c.chi * p.r / c.h0), 2)}/${fmt(2 * Math.PI * G, 2)})`, fmt(c.Rb, 3), 'r-Rb'));
     o.push(stepRow('κ_θ(ω) = exp(−4,2(R̄ω)²)', 'например при ω = 1', fmt(kap(K.Rb, 1), 3)));
@@ -186,7 +214,9 @@
     o.push(stepRow('S_к = ' + fmt(p.skPct, 0) + '% · S_КВЛ', `${fmt(p.skPct / 100, 2)}·${fmt(p.Skvl, 0)}`, `${fmt(c.Sk, 1)} м²`, 'r-Sk'));
     o.push(stepRow('r_к = √(z_g² + (B/2)²)', `√(${fmt(c.zg * c.zg, 1)} + ${fmt(p.B * p.B / 4, 1)})`, `${fmt(c.rk, 2)} м`));
     o.push(stepRow('ω₁ = 715·S_к·r_к³·ω̃/(L·B⁴)', `715·${fmt(c.Sk, 1)}·${fmt(c.rk ** 3, 0)}·${fmt(c.wTilde, 3)}/(${fmt(p.L, 0)}·${fmt(p.B ** 4, 0)})`, fmt(c.w1, 2)));
-    o.push(stepRow('2ν_θк = 0,3·ω_θ·√ω₁', `0,3·${fmt(c.wt, 3)}·√${fmt(c.w1, 2)}`, fmt(c.nu2k, 3), 'r-nu2k'));
+    o.push(OVR.Ttheta != null
+      ? stepRow('2ν_θк = 0,3·ω_θ·√ω₁', `0,3·${fmt(K.wt, 3)}·√${fmt(c.w1, 2)} (с экспериментальной ω_θ)`, fmt(K.nu2k, 3), 'r-nu2k')
+      : stepRow('2ν_θк = 0,3·ω_θ·√ω₁', `0,3·${fmt(c.wt, 3)}·√${fmt(c.w1, 2)}`, fmt(c.nu2k, 3), 'r-nu2k'));
     if (mode === 'work') {
       o.push(`<div class="small" style="margin-top:8px">Режим «как в работе»: дальше используются эффективные константы листа исходной
       работы (восстановлены из её таблиц): ω_θ = <b>${fmt(K.wt, 4)}</b>, 2ν_θ = <b>${fmt(K.nu2, 4)}</b>,
@@ -250,6 +280,51 @@
     $('r-summary').innerHTML = sum;
     $('r-summary-acc').innerHTML = acc;
   }
+
+  /* подстановка переданных по URL входов + плашка об источнике данных */
+  (function applyQuery() {
+    const got = [];
+    const setIn = (id, v, label) => { $(id).value = v; got.push(label); };
+    const L = qn('L'); if (L != null) setIn('in-L', L, `L = ${fmt(L, 0)} м`);
+    const B = qn('B'); if (B != null) setIn('in-B', B, `B = ${fmt(B, 1)} м`);
+    const T = qn('T'); if (T != null) setIn('in-T', T, `T = ${fmt(T, 1)} м`);
+    const Hd = qn('H'); if (Hd != null) setIn('in-H', Hd, `H = ${fmt(Hd, 1)} м`);
+    const de = qn('delta'); if (de != null) setIn('in-delta', de, `δ = ${fmt(de, 3)}`);
+    const al = qn('alpha'); if (al != null) setIn('in-alpha', al, `α = ${fmt(al, 3)}`);
+    const zc = qn('zc'); if (zc != null) setIn('in-zc', zc, `z_c = ${fmt(zc, 2)} м`);
+    const rr = qn('r'); if (rr != null) setIn('in-r', rr, `r = ${fmt(rr, 2)} м`);
+    const V = qn('V'); if (V != null) setIn('in-V', Math.round(V), `V = ${fmt(V, 0)} м³`);
+    const zg = qn('zg');
+    if (zg != null) {
+      const Hcur = parseFloat($('in-H').value) || DEFAULTS.H;
+      setIn('in-kzg', +(zg / Hcur).toFixed(4), `z_g = ${fmt(zg, 2)} м (z_g/H = ${fmt(zg / Hcur, 3)})`);
+    }
+    const hq = qn('h');
+    // если метацентрическая высота передана, а r — нет, подбираем r так, чтобы h₀ = z_c + r − z_g совпала
+    if (hq != null && rr == null && zg != null) {
+      const zcCur = parseFloat($('in-zc').value) || DEFAULTS.zc;
+      const rFit = Math.max(0.05, hq + zg - zcCur);
+      $('in-r').value = +rFit.toFixed(3);
+      got.push(`h = ${fmt(hq, 2)} м (r подобран: ${fmt(rFit, 2)} м)`);
+    } else if (hq != null) {
+      got.push(`h = ${fmt(hq, 2)} м`);
+    }
+    const exp = [];
+    if (OVR.Ttheta != null) exp.push(`T_θ = ${fmt(OVR.Ttheta, 2)} с → ω_θ = ${fmt(2 * Math.PI / OVR.Ttheta, 2)} 1/с`);
+    if (OVR.nu2 != null) exp.push(`2ν_θ = ${fmt(OVR.nu2, 3)} 1/с`);
+    if (!got.length && !exp.length) return;
+    const src = exp.length
+      ? 'опыта в <a href="basin">опытовом бассейне</a>'
+      : 'расчёта <a href="solver">посадки и остойчивости</a>';
+    const d = document.createElement('div');
+    d.className = 'note tip';
+    d.innerHTML = `<b>Данные переданы из ${src}:</b> ${exp.concat(got).join('; ')}.` +
+      (exp.length ? ' Переданные значения переопределяют шаг 3 (пометки в решении); АЧХ и спектральный расчёт считаются от них.' : '') +
+      (got.length && !exp.length ? ' Значения подставлены во входы ниже; остальные параметры остались от варианта АI.' : '') +
+      ` <a class="btn" href="roll" style="margin-left:10px">сбросить</a>`;
+    const main = document.querySelector('main.wrap');
+    main.insertBefore(d, main.children[2] || null);
+  })();
 
   for (const k of IN) $('in-' + k).addEventListener('input', recalc);
   for (const id of ['in-mode', 'in-balls', 'in-tblvar']) $(id).addEventListener('change', recalc);

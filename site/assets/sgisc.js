@@ -34,7 +34,53 @@ function sgiscCompute() {
   else Rpr = 0.17 + 0.2125 * akFac;
   const ratio = GM > 0.01 ? dGM1 / GM : Infinity;
   const prOK = ratio <= Rpr && reserve >= 1.0;
-  return { Fn, reserve, dL1, GMmin, plOK, dH, dL2, dGM1, GM, Rpr, ratio, prOK };
+  return { Fn, reserve, dL1, GMmin, plOK, dH, dL2, dGM1, GM, Rpr, ratio, prOK,
+           zc: h0.zc, KM: h0.KM, V: h0.V, IxL1, IxH, IxL2 };
+}
+
+/* --- живая схема к уровню 1: мидель-шпангоут с тремя ватерлиниями --- */
+function sgiscFigure(r) {
+  const svg = document.getElementById('sg-fig');
+  if (!svg || typeof sectionPoly !== 'function') return;
+  const S = 24, X0 = 320, Y = z => 290 - S * z;
+  const F = (v, d = 2) => fmt(v, d);
+  const sub = (b, s, rest) =>
+    `${b}<tspan font-size="8" dy="2">${s}</tspan><tspan dy="-2">${rest || ''}</tspan>`;
+  const hull = sectionPoly(HULL.L / 2)
+    .map((p, i) => (i ? 'L' : 'M') + (X0 + p[0] * S).toFixed(1) + ',' + Y(p[1]).toFixed(1))
+    .join(' ') + ' Z';
+  const d = stG.d, KG = stG.KG;
+  const yD = Y(d), yL = Y(r.dL1), yH = Y(r.dH);
+  const yB = Y(r.zc), yG = Y(KG), yMs = Y(r.KM), yMw = Y(KG + r.GMmin);
+  // подписи G и M′ разводим по разные стороны, чтобы не сталкивались
+  const gLab = r.GMmin >= 0 ? yG + 13 : yG - 6;
+  const mwLab = r.GMmin >= 0 ? yMw - 6 : yMw + 13;
+  const wl = (y, cls, dash) =>
+    `<path class="${cls}" ${dash ? 'stroke-dasharray="7 5"' : ''} d="M24,${y.toFixed(1)} L616,${y.toFixed(1)}"/>`;
+  svg.innerHTML = `
+    <rect x="24" y="${yD.toFixed(1)}" width="592" height="${(290 - yD).toFixed(1)}" fill="rgba(21,94,117,.06)"/>
+    <path class="sk-i" fill="#fff" d="${hull}"/>
+    ${wl(yD, 'sk-i sk-w1')}
+    ${wl(yL, 'sk-r sk-w1', 1)}
+    ${wl(yH, 'sk-t sk-w1', 1)}
+    <path class="sk-m sk-dsh" d="M320,56 L320,296"/>
+    <text class="fg-mut" x="28" y="44">мидель-шпангоут (корпус сайта), волна λ = L</text>
+    <text class="fg-teal" x="28" y="${(yH - 4).toFixed(1)}">${sub('d', 'H', ` = ${F(r.dH)} м · `)}${sub('I', 'TH', ` = ${F(r.IxH, 0)} м⁴`)}</text>
+    <text x="28" y="${(yD - 4).toFixed(1)}">d = ${F(d, 1)} м — тихая вода</text>
+    <text class="fg-red" x="28" y="${(yL - 4).toFixed(1)}">${sub('d', 'L', ` = ${F(r.dL1)} м · `)}${sub('I', 'TL', ` = ${F(r.IxL1, 0)} м⁴`)}</text>
+    <circle cx="320" cy="290" r="3" fill="#16161a"/><text x="328" y="294">K</text>
+    <circle cx="320" cy="${yB.toFixed(1)}" r="3" fill="#155e75"/>
+    <text class="fg-teal" x="328" y="${(yB + 4).toFixed(1)}">B (KB = ${F(r.zc)} м)</text>
+    <circle cx="320" cy="${yMs.toFixed(1)}" r="3" fill="#fff" stroke="#6b6b74" stroke-width="1.4"/>
+    <text class="fg-mut" x="312" y="${(yMs + 4).toFixed(1)}" text-anchor="end">M (тихая вода)</text>
+    <circle cx="320" cy="${yG.toFixed(1)}" r="3" fill="#16161a"/>
+    <text x="328" y="${gLab.toFixed(1)}">G (KG = ${F(KG, 1)} м)</text>
+    <circle cx="320" cy="${yMw.toFixed(1)}" r="3" fill="#b3382e"/>
+    <text class="fg-red" x="328" y="${mwLab.toFixed(1)}">M′ — на гребне</text>
+    <path class="sk-m sk-w1" stroke-dasharray="3 3" d="M322,${yG.toFixed(1)} L440,${yG.toFixed(1)}"/>
+    <path class="sk-m sk-w1" stroke-dasharray="3 3" d="M322,${yMw.toFixed(1)} L440,${yMw.toFixed(1)}"/>
+    <path class="sk-r" marker-end="url(#aR)" d="M440,${yG.toFixed(1)} L440,${yMw.toFixed(1)}"/>
+    <text class="fg-red fg-b" x="448" y="${((yG + yMw) / 2 + 4).toFixed(1)}">${sub('GM', 'min', ` = ${F(r.GMmin, 3)} м`)}</text>`;
 }
 
 function sgiscRender() {
@@ -57,6 +103,13 @@ function sgiscRender() {
     <tr><td>δGM₁/GM (GM = ${F(r.GM, 2)} м) против R<sub>PR</sub> = ${F(r.Rpr, 2)}</td>
       <td>${F(r.ratio, 3)}</td>
       <td><span class="badge ${r.prOK ? 'ok' : 'bad'}">${r.prOK ? 'не уязвимо' : 'УЯЗВИМО — нужен уровень 2'}</span></td></tr>`;
+  const set = (id, txt, color) => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = txt; if (color) el.style.color = color; }
+  };
+  set('sg-f-gmmin', F(r.GMmin, 3) + ' м', r.GMmin >= 0.05 ? '#1a7f37' : '#b3382e');
+  set('sg-f-dgm1', F(r.dGM1, 3) + ' м', r.ratio <= r.Rpr ? '#1a7f37' : '#b3382e');
+  sgiscFigure(r);
 }
 
 for (const [id, key] of [['sg-d', 'd'], ['sg-kg', 'KG'], ['sg-vs', 'Vs'], ['sg-ak', 'Ak'], ['sg-cm', 'Cm']]) {

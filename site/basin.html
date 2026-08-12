@@ -24,7 +24,7 @@
     <line x1="20" y1="142" x2="300" y2="142" stroke="#155e75" stroke-width="1.6"/>
     <path d="M 20 142 L 300 142 L 300 210 L 20 210 Z" fill="rgba(21,94,117,.10)"/>
     <!-- модель (накренена) -->
-    <g transform="rotate(-14 160 150)">
+    <g id="vx1-model" transform="rotate(-14 160 150)">
       <path d="M 122 128 L 122 148 Q 122 166 142 170 L 178 170 Q 198 166 198 148 L 198 128 Z" fill="#fff" stroke="#16161a" stroke-width="1.8"/>
       <line x1="160" y1="150" x2="160" y2="96" stroke="#b3382e" stroke-width="1.3"/>
     </g>
@@ -37,23 +37,54 @@
     <path d="M 178 118 C 240 76 280 70 330 70" fill="none" stroke="#6b6b74" stroke-width="1.1" stroke-dasharray="3 3"/>
     <rect x="330" y="40" width="290" height="140" rx="8" fill="#fff" stroke="#16161a" stroke-width="1.8"/>
     <text x="340" y="58" style="font:11.5px system-ui;fill:#6b6b74">осциллограф: запись θ(t)</text>
-    <!-- затухающая синусоида: θ = 42·exp(-0.11 t)·cos -->
-    <path d="M 345 110 C 350 80 355 74 360 74 C 368 74 374 140 382 140 C 389 140 394 82 401 82 C 408 82 413 134 420 134 C 427 134 432 88 438 88 C 445 88 450 129 456 129 C 463 129 467 93 473 93 C 480 93 484 125 490 125 C 497 125 501 97 507 97 C 513 97 517 122 523 122 C 530 122 534 100 540 100 C 546 100 550 119 556 119 C 562 119 566 102 572 102 C 578 102 582 117 588 117 C 594 117 598 104 604 104 C 608 104 611 112 614 112" fill="none" stroke="#155e75" stroke-width="1.6"/>
-    <!-- огибающие -->
-    <path d="M 348 76 C 420 84 520 98 616 105" fill="none" stroke="#b3382e" stroke-width="1.2" stroke-dasharray="5 4"/>
-    <path d="M 348 144 C 420 136 520 122 616 115" fill="none" stroke="#b3382e" stroke-width="1.2" stroke-dasharray="5 4"/>
-    <text x="470" y="76" style="font:11px system-ui;fill:#b3382e">огибающие</text>
-    <!-- размах l -->
-    <line x1="382" y1="85" x2="382" y2="139" stroke="#16161a" stroke-width="1" marker-start="url(#arrS)" marker-end="url(#arrE)"/>
-    <text x="386" y="128" style="font:italic 12.5px Georgia,serif;fill:#16161a">l₂</text>
     <line x1="345" y1="110" x2="616" y2="110" stroke="#6b6b74" stroke-width=".7"/>
-    <!-- отсечки времени -->
-    <line x1="360" y1="164" x2="540" y2="164" stroke="#16161a" stroke-width="1" marker-start="url(#arrS)" marker-end="url(#arrE)"/>
-    <text x="404" y="177" style="font:11.5px system-ui;fill:#16161a">T_n = n полных колебаний</text>
+    <g id="vx1-static">
+      <!-- затухающая синусоида: θ = 42·exp(-0.11 t)·cos -->
+      <path d="M 345 110 C 350 80 355 74 360 74 C 368 74 374 140 382 140 C 389 140 394 82 401 82 C 408 82 413 134 420 134 C 427 134 432 88 438 88 C 445 88 450 129 456 129 C 463 129 467 93 473 93 C 480 93 484 125 490 125 C 497 125 501 97 507 97 C 513 97 517 122 523 122 C 530 122 534 100 540 100 C 546 100 550 119 556 119 C 562 119 566 102 572 102 C 578 102 582 117 588 117 C 594 117 598 104 604 104 C 608 104 611 112 614 112" fill="none" stroke="#155e75" stroke-width="1.6"/>
+      <!-- огибающие -->
+      <path d="M 348 76 C 420 84 520 98 616 105" fill="none" stroke="#b3382e" stroke-width="1.2" stroke-dasharray="5 4"/>
+      <path d="M 348 144 C 420 136 520 122 616 115" fill="none" stroke="#b3382e" stroke-width="1.2" stroke-dasharray="5 4"/>
+      <text x="470" y="76" style="font:11px system-ui;fill:#b3382e">огибающие</text>
+      <!-- размах l -->
+      <line x1="382" y1="85" x2="382" y2="139" stroke="#16161a" stroke-width="1" marker-start="url(#arrS)" marker-end="url(#arrE)"/>
+      <text x="386" y="128" style="font:italic 12.5px Georgia,serif;fill:#16161a">l₂</text>
+      <!-- отсечки времени -->
+      <line x1="360" y1="164" x2="540" y2="164" stroke="#16161a" stroke-width="1" marker-start="url(#arrS)" marker-end="url(#arrE)"/>
+      <text x="404" y="177" style="font:11.5px system-ui;fill:#16161a">T_n = n полных колебаний</text>
+    </g>
+    <g id="vx1-live" style="display:none">
+      <path id="vx1-envU" fill="none" stroke="#b3382e" stroke-width="1.2" stroke-dasharray="5 4"/>
+      <path id="vx1-envL" fill="none" stroke="#b3382e" stroke-width="1.2" stroke-dasharray="5 4"/>
+      <path id="vx1-trace" fill="none" stroke="#155e75" stroke-width="1.6"/>
+      <text id="vx1-clock" x="340" y="176" style="font:11px system-ui;fill:#6b6b74"></text>
+    </g>
+    <text id="vx1-deg" x="216" y="112" style="font:italic 13px Georgia,serif;fill:#b3382e"></text>
   </svg>
   <p class="small">Схема опыта: модель наклоняют и отпускают; датчик угла пишет
   осциллограмму затухающих колебаний. По отсечкам времени снимают период, по
   вертикальным расстояниям между огибающими — размахи l_i.</p>
+
+  <div class="panel">
+    <h3 style="margin-top:0">Виртуальный опыт: накрените модель и снимите осциллограмму</h3>
+    <p class="small" style="margin:2px 0 8px">Модель на схеме выше — живая. Уравнение
+    свободных колебаний θ̈ + 2ν_θ(θ_a)·θ̇ + ω_θ²·θ = 0 интегрируется честно:
+    период T_θ = 1,19 с, демпфирование слегка нелинейное — 2ν̄_θ(θ_a) ≈ 0,022 + 0,0009·θ_a
+    (θ_a — текущая амплитуда, град), поэтому каждый запуск даёт свои числа, близкие к
+    отчётным, но не совпадающие. Размахи снимаются с осциллограммы в мм с погрешностью
+    отсчёта ±0,5 мм — как линейкой с бумажной ленты.</p>
+    <div class="controls" style="font-size:13.5px">
+      <label>начальный крен θ₀
+        <input type="range" id="vx1-th0" min="5" max="20" step="1" value="15">
+        <span class="readout" id="vx1-th0-out">15°</span></label>
+      <button class="btn primary" id="vx1-go" type="button">Накренить и отпустить</button>
+      <button class="btn" id="vx1-auto" type="button">▶ Авто-опыт</button>
+      <button class="btn" id="vx1-snap" type="button" disabled>Снять осциллограмму</button>
+      <button class="btn" id="vx1-reset" type="button" disabled>Вернуть данные отчёта</button>
+    </div>
+    <p class="small" id="vx1-msg" style="margin:6px 2px 0">Таблицы ниже пока считаются от
+    осциллограммы из отчёта лабораторной. Запустите опыт и нажмите «Снять осциллограмму» —
+    вся обработка (Благовещенский и логарифмическая формулы) пересчитается от ваших размахов.</p>
+  </div>
 
   <div class="panel">
     <div class="controls" style="font-size:13.5px">
@@ -64,7 +95,7 @@
     <div id="l1-steps" class="note tip"></div>
   </div>
 
-  <h3>Обработка 19 размахов</h3>
+  <h3 id="l1-proc-title">Обработка 19 размахов</h3>
   <div class="panel" style="overflow-x:auto">
     <table style="width:100%;border-collapse:collapse;font:13px system-ui"><tbody id="l1-table"></tbody></table>
     <p class="small" style="margin:8px 2px 2px">Слева — формула Благовещенского
@@ -75,39 +106,68 @@
   <div class="panel">
     <div id="l1-chart"></div>
     <p class="small" id="l1-last" style="margin:8px 2px 2px"></p>
+    <div class="controls" style="margin:10px 0 2px">
+      <a class="btn primary" id="vx1-toroll" href="roll">использовать период и демпфирование в расчёте качки →</a>
+    </div>
+    <p class="small" id="vx1-toroll-note" style="margin:4px 2px 2px"></p>
   </div>
 
   <h2>Буксировочные испытания с пересчётом на натуру</h2>
   <svg viewBox="0 0 640 230" class="geo-board" style="max-width:640px">
-    <!-- рельсы и тележка -->
+    <!-- рельсы -->
     <line x1="20" y1="60" x2="620" y2="60" stroke="#16161a" stroke-width="2.4"/>
     <line x1="20" y1="66" x2="620" y2="66" stroke="#16161a" stroke-width="1"/>
-    <rect x="250" y="28" width="150" height="30" rx="5" fill="#fff" stroke="#16161a" stroke-width="1.8"/>
-    <circle cx="276" cy="62" r="7" fill="#fff" stroke="#16161a" stroke-width="1.6"/>
-    <circle cx="374" cy="62" r="7" fill="#fff" stroke="#16161a" stroke-width="1.6"/>
-    <text x="262" y="48" style="font:12px system-ui;fill:#16161a">тележка</text>
-    <line x1="410" y1="43" x2="470" y2="43" stroke="#b3382e" stroke-width="1.4" marker-end="url(#arrE)"/>
-    <text x="424" y="36" style="font:italic 13px Georgia,serif;fill:#b3382e">v</text>
     <!-- вода -->
     <path d="M 20 140 L 20 210 L 620 210 L 620 140" fill="none" stroke="#16161a" stroke-width="2"/>
-    <line x1="20" y1="152" x2="620" y2="152" stroke="#155e75" stroke-width="1.6"/>
+    <path id="vx2-water" d="M 20 152 L 620 152" fill="none" stroke="#155e75" stroke-width="1.6"/>
     <path d="M 20 152 L 620 152 L 620 210 L 20 210 Z" fill="rgba(21,94,117,.10)"/>
-    <!-- подвес с динамометром и модель -->
-    <line x1="325" y1="58" x2="325" y2="118" stroke="#16161a" stroke-width="1.4"/>
-    <rect x="313" y="82" width="24" height="16" rx="3" fill="#fff" stroke="#b3382e" stroke-width="1.6"/>
-    <text x="344" y="95" style="font:11.5px system-ui;fill:#b3382e">датчик силы R</text>
-    <path d="M 262 132 L 388 132 L 388 152 Q 388 172 360 176 L 296 176 Q 268 170 264 152 Z" fill="#fff" stroke="#16161a" stroke-width="1.8"/>
-    <path d="M 262 132 L 250 152 L 264 152" fill="#fff" stroke="#16161a" stroke-width="1.6"/>
-    <text x="296" y="148" style="font:11.5px system-ui;fill:#16161a">модель, L_м = 2,41 м</text>
+    <!-- буксирный трос к приводу -->
+    <line id="vx2-rope" x1="400" y1="43" x2="596" y2="64" stroke="#6b6b74" stroke-width="1.1"/>
+    <!-- тележка с подвесом, датчиком и моделью -->
+    <g id="vx2-cart">
+      <rect x="250" y="28" width="150" height="30" rx="5" fill="#fff" stroke="#16161a" stroke-width="1.8"/>
+      <circle cx="276" cy="62" r="7" fill="#fff" stroke="#16161a" stroke-width="1.6"/>
+      <circle cx="374" cy="62" r="7" fill="#fff" stroke="#16161a" stroke-width="1.6"/>
+      <text x="262" y="48" style="font:12px system-ui;fill:#16161a">тележка</text>
+      <line x1="410" y1="43" x2="470" y2="43" stroke="#b3382e" stroke-width="1.4" marker-end="url(#arrE)"/>
+      <text x="424" y="36" style="font:italic 13px Georgia,serif;fill:#b3382e">v</text>
+      <line x1="325" y1="58" x2="325" y2="118" stroke="#16161a" stroke-width="1.4"/>
+      <rect x="313" y="82" width="24" height="16" rx="3" fill="#fff" stroke="#b3382e" stroke-width="1.6"/>
+      <text x="344" y="95" style="font:11.5px system-ui;fill:#b3382e">датчик силы R</text>
+      <path d="M 262 132 L 388 132 L 388 152 Q 388 172 360 176 L 296 176 Q 268 170 264 152 Z" fill="#fff" stroke="#16161a" stroke-width="1.8"/>
+      <path d="M 262 132 L 250 152 L 264 152" fill="#fff" stroke="#16161a" stroke-width="1.6"/>
+      <text x="296" y="148" style="font:11.5px system-ui;fill:#16161a">модель, L_м = 2,41 м</text>
+    </g>
     <!-- гравитационный привод -->
     <circle cx="600" cy="72" r="10" fill="#fff" stroke="#16161a" stroke-width="1.6"/>
-    <line x1="400" y1="43" x2="596" y2="64" stroke="#6b6b74" stroke-width="1.1"/>
-    <line x1="610" y1="72" x2="610" y2="112" stroke="#6b6b74" stroke-width="1.1"/>
-    <rect x="600" y="112" width="20" height="24" fill="#eceae3" stroke="#16161a" stroke-width="1.4"/>
+    <line id="vx2-wline" x1="610" y1="72" x2="610" y2="112" stroke="#6b6b74" stroke-width="1.1"/>
+    <rect id="vx2-weight" x="600" y="112" width="20" height="24" fill="#eceae3" stroke="#16161a" stroke-width="1.4"/>
     <text x="452" y="100" style="font:11px system-ui;fill:#6b6b74">гравитационный привод:</text>
     <text x="452" y="113" style="font:11px system-ui;fill:#6b6b74">груз через блок тянет тележку</text>
+    <text id="vx2-read" x="26" y="18" style="font:12px ui-monospace,Consolas,monospace;fill:#155e75"></text>
     <text x="28" y="226" style="font:11.5px system-ui;fill:#6b6b74">гравитационный опытовый бассейн: на каждом режиме замеряются скорость v и сила R</text>
   </svg>
+
+  <div class="panel">
+    <h3 style="margin-top:0">Виртуальный опыт: подберите груз и снимите точки (v, R)</h3>
+    <p class="small" style="margin:2px 0 8px">Гравитационный привод: груз массой m через блок
+    тянет тележку, и разгон подчиняется уравнению (M + m)·dv/dt = m·g − R(v); режим
+    устанавливается, когда тяга m·g уравновешивается сопротивлением. Кривая R(v) — гладкая
+    монотонная кубическая интерполяция экспериментальных точек отчёта; датчик показывает силу
+    с дрожанием ±2 %, и снятая точка несёт эту погрешность. Дорожка бассейна на схеме условно
+    закольцована.</p>
+    <div class="controls" style="font-size:13.5px">
+      <label>масса груза m
+        <input type="range" id="vx2-m" min="30" max="1400" step="10" value="400">
+        <span class="readout" id="vx2-m-out">400 г</span></label>
+      <button class="btn primary" id="vx2-go" type="button">Пуск</button>
+      <button class="btn" id="vx2-snap" type="button" disabled>Снять точку (v, R)</button>
+      <button class="btn" id="vx2-reset" type="button" disabled>Вернуть данные отчёта</button>
+    </div>
+    <p class="small" id="vx2-msg" style="margin:6px 2px 0">Таблица режимов ниже пока считается
+    от 8 точек отчёта. Снимите свои точки на установившихся режимах — пересчёт по Фруду пойдёт
+    от них; меняйте массу груза прямо на ходу, чтобы пройти несколько режимов за один заезд.</p>
+  </div>
 
   <div class="panel">
     <div class="controls" style="font-size:13.5px">
@@ -128,7 +188,7 @@
     <div id="l2-steps" class="note tip"></div>
   </div>
 
-  <h3>Все 8 режимов</h3>
+  <h3 id="l2-runs-title">Все 8 режимов</h3>
   <div class="panel" style="overflow-x:auto">
     <table style="width:100%;border-collapse:collapse;font:13px system-ui"><tbody id="l2-table"></tbody></table>
     <p class="small" style="margin:8px 2px 2px">* Честное примечание: на трёх

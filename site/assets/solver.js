@@ -202,6 +202,30 @@ function recompute() {
   miniChartBig(document.getElementById('c-gz'), curve, hMeta);
   criteria(curve, hMeta);
   solveSteps(h, curve, hMeta, rho);
+  handoffLinks(h, hMeta);
+}
+
+/* передача корпуса в смежные расчёты по URL (querystring) */
+function handoffLinks(h, hMeta) {
+  const aRoll = document.getElementById('go-roll');
+  const aBrus = document.getElementById('go-brus');
+  if (!aRoll || !aBrus) return;
+  const L = HULL.L, B = stS.Bh, T = stS.T, zg = stS.zg;
+  const Cb = h.V / (L * B * T);              // коэффициент общей полноты δ = C_b
+  const alpha = h.Awl / (L * B);             // коэффициент полноты ватерлинии
+  const qsRoll = new URLSearchParams({
+    L: L, B: B, T: T, H: HULL.H, zg: zg,
+    V: Math.round(h.V), zc: h.zc.toFixed(2), r: h.r.toFixed(2),
+    delta: Cb.toFixed(3), alpha: alpha.toFixed(3), h: hMeta.toFixed(3),
+  });
+  aRoll.href = 'roll?' + qsRoll.toString();
+  const qsBrus = new URLSearchParams({ L: L, B: B, Cb: Cb.toFixed(3) });
+  aBrus.href = '/strength/brus?' + qsBrus.toString();
+  const note = document.getElementById('go-note');
+  if (note) note.innerHTML = `Сейчас уйдут: в качку — L = ${L} м, B = ${fmt(B, 1)} м, T = ${fmt(T, 1)} м,
+    H = ${HULL.H} м, z_g = ${fmt(zg, 1)} м, V = ${fmt(h.V, 0)} м³, z_c = ${fmt(h.zc, 2)} м,
+    r = ${fmt(h.r, 2)} м, δ = ${fmt(Cb, 3)}, α = ${fmt(alpha, 3)}, h = ${fmt(hMeta, 2)} м;
+    в прочность — L = ${L} м, B = ${fmt(B, 1)} м, C_b = ${fmt(Cb, 3)}.`;
 }
 
 /* пошаговое решение: формула → подстановка → результат */
