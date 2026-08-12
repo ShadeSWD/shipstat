@@ -218,6 +218,55 @@
     вверх после Fr ≈ 0,25 — рост волнового сопротивления.</p>
   </div>
 
+
+  <h2>Опыт кренования модели</h2>
+  <p>Третья работа бассейна — прямое измерение начальной остойчивости.
+  Груз известной массы \(p\) перекладывают поперёк модели на плечо
+  \(l_y\), а угол крена снимают двумя отвесами (весками) длиной
+  \(\lambda\): по отклонению нити \(a\) сразу получается тангенс угла.
+  Метацентрическая высота выражается из условия равенства кренящего и
+  восстанавливающего моментов:</p>
+  $$p\,l_y = D\,h_0 \tg\theta \quad\Rightarrow\quad
+    h_0 = \dfrac{p\,l_y}{D\,\tg\theta}, \qquad \tg\theta = \dfrac{a}{\lambda}.$$
+  <p>Груз перекладывают многократно и в обе стороны: так исключаются
+  случайная погрешность отсчёта и несимметрия модели, а разброс отдельных
+  значений \(h_{0i}\) показывает качество опыта. Тот же приём в натуре —
+  <a href="t-initial#krenovanie">опыт кренования судна</a> при сдаче:
+  им определяют аппликату центра тяжести построенного судна.</p>
+
+  <svg viewBox="0 0 640 250" class="geo-board" style="max-width:640px">
+    <line x1="20" y1="130" x2="620" y2="130" stroke="#155e75" stroke-width="1.4"/>
+    <path d="M 20 130 L 620 130 L 620 210 L 20 210 Z" fill="rgba(21,94,117,.10)"/>
+    <g transform="rotate(-8 320 140)">
+      <path d="M 236 92 L 404 92 L 404 140 Q 404 168 372 172 L 268 172 Q 236 168 236 140 Z"
+            fill="#fff" stroke="#16161a" stroke-width="1.8"/>
+      <rect x="352" y="76" width="34" height="16" fill="rgba(179,56,46,.25)" stroke="#b3382e" stroke-width="1.4"/>
+      <text x="369" y="70" text-anchor="middle" style="font:11px system-ui;fill:#b3382e">груз p</text>
+      <line x1="320" y1="92" x2="352" y2="92" stroke="#b3382e" stroke-width="1" stroke-dasharray="3 3"/>
+      <text x="330" y="106" style="font:11px system-ui;fill:#b3382e">l_y</text>
+      <line x1="286" y1="92" x2="286" y2="168" stroke="#6b6b74" stroke-width="1"/>
+      <circle cx="286" cy="168" r="4" fill="#6b6b74"/>
+      <text x="292" y="126" style="font:11px system-ui;fill:#6b6b74">отвес λ</text>
+    </g>
+    <line x1="286" y1="92" x2="286" y2="176" stroke="#8a8a92" stroke-width="1" stroke-dasharray="4 4"/>
+    <path d="M 286 150 A 34 34 0 0 0 296 146" fill="none" stroke="#b3382e" stroke-width="1.3"/>
+    <text x="300" y="150" style="font:italic 13px Georgia,serif;fill:#b3382e">θ</text>
+    <text x="26" y="124" style="font:11px system-ui;fill:#155e75">тихая вода</text>
+    <text x="26" y="236" style="font:11px system-ui;fill:#6b6b74">перекладка груза поперёк кренит модель; отсчёт по шкале даёт a, а с ним и tg θ = a/λ</text>
+  </svg>
+
+  <div class="panel">
+    <div class="controls" style="font-size:13.5px">
+      <label>p (груз) <input type="number" id="kr-p" value="1.17" step="0.01" style="width:78px"></label>
+      <label>l_y (плечо) <input type="number" id="kr-l" value="32.5" step="0.1" style="width:78px"></label>
+      <label>D (водоизмещение) <input type="number" id="kr-D" value="490.5" step="0.5" style="width:86px"></label>
+      <label>λ (длина отвеса) <input type="number" id="kr-lam" value="100" step="1" style="width:78px"></label>
+      <button class="btn" id="kr-auto" type="button">▶ Авто-опыт (8 перекладок)</button>
+      <button class="btn" id="kr-reset" type="button">вернуть учебный пример</button>
+    </div>
+    <div id="kr-out"></div>
+  </div>
+
   <p>Теория качки — <a href="t-rolling">глава 6</a>; полный расчёт бортовой
   качки — <a href="roll">расчёт качки</a>.</p>
 </main>

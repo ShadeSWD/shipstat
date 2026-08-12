@@ -574,6 +574,87 @@
   });
   $('vx2-stop').addEventListener('click', () => { autoStop = true; });
 
+  /* ================= Опыт кренования модели ================= */
+  {
+    // учебный пример: 8 перекладок груза, отсчёты двух отвесов
+    const KR_REPORT = [
+      { dir: 1, o1: 17.3, o2: 17.5 }, { dir: 1, o1: 19.6, o2: 19.9 },
+      { dir: -1, o1: 17.3, o2: 17.5 }, { dir: -1, o1: 14.8, o2: 15.0 },
+      { dir: -1, o1: 12.1, o2: 12.3 }, { dir: -1, o1: 9.7, o2: 10.0 },
+      { dir: 1, o1: 12.1, o2: 12.4 }, { dir: 1, o1: 14.7, o2: 14.8 },
+    ];
+    const KR0 = { o1: 14.7, o2: 15.0 };
+    let krRows = KR_REPORT.slice(), krSrc = 'учебный пример';
+
+    function krCalc() {
+      const p = +$('kr-p').value, ly = +$('kr-l').value, D = +$('kr-D').value, lam = +$('kr-lam').value;
+      const M = p * ly;
+      let prev = KR0, sum = 0, n = 0;
+      const rows = krRows.map((r, i) => {
+        const d1 = (r.o1 - prev.o1) / lam, d2 = (r.o2 - prev.o2) / lam;
+        const tg = (d1 + d2) / 2;
+        const h = Math.abs(tg) > 1e-9 ? (M * r.dir) / (D * tg) : NaN;
+        prev = r;
+        if (isFinite(h)) { sum += h; n++; }
+        return { i: i + 1, ...r, d1, d2, tg, h };
+      });
+      const h0 = n ? sum / n : NaN;
+      const disp = n ? rows.reduce((s2, r) => s2 + (isFinite(r.h) ? (r.h - h0) ** 2 : 0), 0) : NaN;
+      return { M, rows, h0, disp, p, ly, D, lam };
+    }
+
+    function krRender() {
+      const c = krCalc();
+      let t = `<h3>Журнал опыта (${krSrc})</h3>
+        <table class="data" style="width:100%;border-collapse:collapse;font:13px system-ui">
+        <tr><th>№</th><th>направление</th><th>M = p·l_y</th><th>отсчёт 1</th><th>отсчёт 2</th>
+            <th>tg θ</th><th>h₀ᵢ</th></tr>`;
+      for (const r of c.rows) {
+        t += `<tr><td style="padding:2px 6px">${r.i}</td><td style="text-align:center">${r.dir > 0 ? '+' : '−'}</td>
+          <td style="text-align:right;padding:2px 6px">${fmt(c.M * r.dir, 3)}</td>
+          <td style="text-align:right;padding:2px 6px">${fmt(r.o1, 1)}</td>
+          <td style="text-align:right;padding:2px 6px">${fmt(r.o2, 1)}</td>
+          <td style="text-align:right;padding:2px 6px">${fmt(r.tg, 4)}</td>
+          <td style="text-align:right;padding:2px 6px"><b>${fmt(r.h, 3)}</b></td></tr>`;
+      }
+      t += '</table>';
+      t += `<div class="note tip" style="margin-top:10px">
+        ${stepRow('tg θ = a/λ (среднее по двум отвесам)', 'отсчёты по шкале', '—')}
+        ${stepRow('h₀ᵢ = p·l_y/(D·tg θᵢ)', `${fmt(c.p, 2)}·${fmt(c.ly, 1)}/(${fmt(c.D, 1)}·tg θᵢ)`, 'по строкам таблицы')}
+        ${stepRow('h₀ = Σh₀ᵢ/n', `${fmt(c.rows.reduce((s2, r) => s2 + (isFinite(r.h) ? r.h : 0), 0), 2)}/${c.rows.length}`, `<b>${fmt(c.h0, 3)}</b>`)}
+        ${stepRow('разброс Σ(h₀ᵢ − h₀)²', '', fmt(c.disp, 2))}
+      </div>`;
+      $('kr-out').innerHTML = t;
+      if (window.renderMathInElement) window.renderMathInElement($('kr-out'), {
+        delimiters: [{ left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false }],
+        throwOnError: false,
+      });
+    }
+
+    $('kr-auto').addEventListener('click', async () => {
+      const btn = $('kr-auto'); btn.disabled = true;
+      krSrc = 'ваш виртуальный опыт'; krRows = [];
+      const lam = +$('kr-lam').value, p = +$('kr-p').value, ly = +$('kr-l').value, D = +$('kr-D').value;
+      const hTrue = 3.12;                       // «истинная» метацентрическая высота модели
+      let prev = KR0;
+      const dirs = [1, 1, -1, -1, -1, -1, 1, 1];
+      for (const dir of dirs) {
+        const tg = (p * ly * dir) / (D * hTrue);
+        const d = tg * lam + (Math.random() - 0.5) * 0.12;   // погрешность отсчёта ±0,06
+        const r = { dir, o1: +(prev.o1 + d).toFixed(1), o2: +(prev.o2 + d + (Math.random() - 0.5) * 0.1).toFixed(1) };
+        krRows.push(r); prev = r;
+        krRender();
+        await new Promise(res => setTimeout(res, 260));
+      }
+      btn.disabled = false;
+    });
+    $('kr-reset').addEventListener('click', () => {
+      krRows = KR_REPORT.slice(); krSrc = 'учебный пример'; krRender();
+    });
+    ['kr-p', 'kr-l', 'kr-D', 'kr-lam'].forEach(id => $(id).addEventListener('input', krRender));
+    krRender();
+  }
+
   $('vx1-go').addEventListener('click', v1Start);
   $('vx1-snap').addEventListener('click', v1Snap);
   $('vx1-reset').addEventListener('click', v1Reset);
