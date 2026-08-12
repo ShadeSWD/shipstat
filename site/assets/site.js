@@ -13,7 +13,7 @@
   </svg>`;
   const nav = [
     { href: '', key: 'index', title: 'Главная' },
-    { href: 'solver', key: 'solver', title: 'Решатель: гидростатика и ДСО' },
+    { href: 'solver', key: 'solver', title: 'Посадка и остойчивость' },
     { href: 'theory', key: 'theory', title: 'Теория' },
     { href: 'roll', key: 'roll', title: 'Качка' },
     { href: 'basin', key: 'basin', title: 'Бассейн' },
