@@ -57,7 +57,7 @@
   }
 
   const DEFAULTS = { L: 160, B: 25.8, T: 10.3, H: 14.9, delta: 0.556, alpha: 0.731, zc: 5.87, r: 5.44, V: 24946, kzg: 0.55, Skvl: 3140, skPct: 4 };
-  /* эффективные константы листа исходной работы (восстановлены из её таблиц) */
+  /* эффективные константы листа учебного расчёта (восстановлены из её таблиц) */
   const SHEET = { wt2: 0.350464, nu2: 0.101675, lamBar: 0.137882, Rb: 0.42125, nu2k: 0.2164 };
   const c0 = chain(DEFAULTS);
   const CAL = { wt2: SHEET.wt2 / c0.wt2, nu2: SHEET.nu2 / c0.nu2, lamBar: SHEET.lamBar / c0.lamBar, Rb: SHEET.Rb / c0.Rb, nu2k: SHEET.nu2k / c0.nu2k };
@@ -65,7 +65,7 @@
   /* ---------- АЧХ ---------- */
   const kap = (Rb, w) => Math.exp(-4.2 * (Rb * w) ** 2);
   function makeFns(K, bug) {
-    // bug=true: как в исходной работе — в знаменателе вместо (ω_θ²−ω²) стоит (ω_θ−ω)
+    // bug=true: как в учебном расчёте — в знаменателе вместо (ω_θ²−ω²) стоит (ω_θ−ω)
     const P = w => bug ? (K.wt - w) : (K.wt2 - w * w);
     return {
       full: w => kap(K.Rb, w) * Math.sqrt(((K.wt2 - w * w * K.lamBar) ** 2 + (K.nu2 * w) ** 2) / (P(w) ** 2 + (K.nu2 * w) ** 2)),
