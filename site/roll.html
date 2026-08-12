@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Решатель бортовой качки</title>
+<meta name="description" content="Курсовая «Расчёт бортовой качки» как живой калькулятор: собственная частота, АЧХ по полному и укороченному уравнению, скуловые кили, нерегулярное волнение 4/6/8 баллов.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>Решатель бортовой качки</h1>
+  <p class="lead">Полный расчёт бортовой качки судна по линейной теории — как в
+  курсовой работе кафедры теории корабля СПбГМТУ, но живьём: метацентрическая
+  высота и присоединённый момент инерции, собственная частота и демпфирование,
+  <b>АЧХ качки</b> по полному и укороченному уравнению, скуловые кили и качка
+  на <b>нерегулярном волнении</b> 4, 6 и 8 баллов. Меняйте исходные данные —
+  вся цепочка пересчитывается.</p>
+
+  <svg viewBox="0 0 640 260" class="geo-board" style="max-width:640px">
+    <!-- волновая поверхность -->
+    <path d="M 0 150 C 40 130 80 130 120 150 S 200 170 240 150 S 320 130 360 150 S 440 170 480 150 S 560 130 600 150 S 640 160 640 155 L 640 260 L 0 260 Z" fill="rgba(21,94,117,.10)"/>
+    <path d="M 0 150 C 40 130 80 130 120 150 S 200 170 240 150 S 320 130 360 150 S 440 170 480 150 S 560 130 600 150 S 640 160 640 155" fill="none" stroke="#155e75" stroke-width="1.6"/>
+    <text x="20" y="128" style="font:12px system-ui;fill:#155e75">профиль волны, частота ω</text>
+    <line x1="510" y1="176" x2="588" y2="176" stroke="#155e75" stroke-width="1.1" marker-end="url(#arrE)"/>
+    <text x="514" y="192" style="font:11px system-ui;fill:#155e75">бег волны</text>
+    <!-- накренённое сечение судна (поворот вокруг центра тяжести) -->
+    <g transform="rotate(-18 320 140)">
+      <path d="M 250 90 L 250 150 Q 250 178 285 184 L 355 184 Q 390 178 390 150 L 390 90" fill="#fff" stroke="#16161a" stroke-width="2"/>
+      <line x1="250" y1="90" x2="390" y2="90" stroke="#16161a" stroke-width="2"/>
+      <!-- скуловые кили -->
+      <line x1="257" y1="172" x2="238" y2="186" stroke="#1a7f37" stroke-width="3.5"/>
+      <line x1="383" y1="172" x2="402" y2="186" stroke="#1a7f37" stroke-width="3.5"/>
+      <!-- мачта / диаметральная плоскость -->
+      <line x1="320" y1="184" x2="320" y2="34" stroke="#b3382e" stroke-width="1.4"/>
+      <circle cx="320" cy="140" r="3.4" fill="#16161a"/>
+    </g>
+    <text x="368" y="255" style="font:11.5px system-ui;fill:#1a7f37">скуловые кили (площадь S_к)</text>
+    <line x1="382" y1="250" x2="366" y2="224" stroke="#1a7f37" stroke-width=".9"/>
+    <text x="330" y="152" style="font:12px Georgia,serif;font-style:italic;fill:#16161a">G</text>
+    <!-- вертикаль и угол крена -->
+    <line x1="320" y1="140" x2="320" y2="30" stroke="#6b6b74" stroke-width="1.1" stroke-dasharray="5 4"/>
+    <path d="M 320 62 A 78 78 0 0 0 296 66" fill="none" stroke="#b3382e" stroke-width="1.6" marker-end="url(#arrE)"/>
+    <text x="298" y="52" style="font:italic 15px Georgia,serif;fill:#b3382e">θ</text>
+    <text x="326" y="40" style="font:11px system-ui;fill:#6b6b74">вертикаль</text>
+    <text x="20" y="26" style="font:12px system-ui;fill:#6b6b74">бортовая качка: сечение судна на волне, крен θ(t) = θ_m·cos(ωt − δ_θ)</text>
+  </svg>
+  <p class="small">Схема: судно лагом к волне. Волновой склон возбуждает
+  колебания крена θ; демпфируют их волнообразование и — заметно — скуловые
+  кили. Резонанс — при частоте волны ω, близкой к собственной ω_θ.</p>
+
+  <h2>Исходные данные (вариант АI)</h2>
+  <div class="panel">
+    <div class="controls" style="font-size:13.5px">
+      <label>L, м <input type="number" id="in-L" value="160" step="1" style="width:70px"></label>
+      <label>B, м <input type="number" id="in-B" value="25.8" step="0.1" style="width:70px"></label>
+      <label>T, м <input type="number" id="in-T" value="10.3" step="0.1" style="width:70px"></label>
+      <label>H, м <input type="number" id="in-H" value="14.9" step="0.1" style="width:70px"></label>
+      <label>δ <input type="number" id="in-delta" value="0.556" step="0.001" style="width:76px"></label>
+      <label>α <input type="number" id="in-alpha" value="0.731" step="0.001" style="width:76px"></label>
+      <label>z_c, м <input type="number" id="in-zc" value="5.87" step="0.01" style="width:74px"></label>
+      <label>r, м <input type="number" id="in-r" value="5.44" step="0.01" style="width:74px"></label>
+      <label>V, м³ <input type="number" id="in-V" value="24946" step="1" style="width:86px"></label>
+      <label>z_g/H <input type="number" id="in-kzg" value="0.55" step="0.01" style="width:70px"></label>
+      <label>S_КВЛ, м² <input type="number" id="in-Skvl" value="3140" step="10" style="width:80px"></label>
+      <label>S_к, % S_КВЛ <input type="number" id="in-skPct" value="4" step="0.5" style="width:60px"></label>
+    </div>
+    <div class="controls" style="font-size:13.5px">
+      <label>балльность волнения
+        <select id="in-balls"><option value="4">4 балла</option><option value="6" selected>6 баллов</option><option value="8">8 баллов</option></select></label>
+      <label>формулы
+        <select id="in-mode"><option value="canon" selected>канонические</option><option value="work">как в исходной работе</option></select></label>
+    </div>
+  </div>
+
+  <div class="note warn"><b>Найденная ошибка в исходной работе.</b> В расчётных
+  таблицах курсовой колонка «ω_θ² − ω²» на самом деле вычислялась как
+  <b>(ω_θ − ω)</b> — без возведения в квадрат. Вблизи резонанса обе величины
+  малы и кривые похожи, но вдали от него АЧХ искажена: например, при ω → 0
+  отношение θ_m/α₀ должно стремиться к κ_θ ≈ 1 (судно квазистатически следит
+  за склоном волны), а в работе получилось 0,64. Переключатель «формулы» выше
+  позволяет воспроизвести лист работы («как в исходной работе») или считать
+  канонически (по умолчанию); контрольные числа работы (3,81; 4,36; 14,86;
+  17,68…) сходятся именно в режиме «как в работе», канонический режим даёт
+  немного другие значения — это нормально. Прочие замеченные опечатки текста
+  работы: 2ν_θ напечатано как 0,010 (реально в таблицах использовано 0,102);
+  θ₃% для 4 баллов напечатано 0,59 вместо 1,59 (= 2,64·√0,36); θ̄_max
+  укороченного уравнения 12,73 вместо 2,73; в «хвостах» таблиц листа
+  (ω ≥ 1,45) константы строк противоречат основной части.</div>
+
+  <h2>Решение по шагам: постоянные расчёта</h2>
+  <div class="panel"><div id="r-steps" class="note tip"></div></div>
+
+  <h2>АЧХ бортовой качки</h2>
+  <p>Полное уравнение:
+  θ_m/α₀ = κ_θ·√[((ω_θ² − ω²λ̄₄₄)² + (2ν_θω)²) / ((ω_θ² − ω²)² + (2ν_θω)²)],
+  укороченное: θ_m/α₀ = κ_θ·ω_θ² / √((ω_θ² − ω²)² + (2ν_θω)²).
+  Кривая «с килями» — укороченное уравнение с демпфированием
+  2ν_θк = 0,3·ω_θ·√ω₁.</p>
+  <div class="panel">
+    <div id="r-afr"></div>
+    <p class="small" id="r-peak" style="margin:8px 2px 2px"></p>
+  </div>
+
+  <h2>Качка на нерегулярном волнении</h2>
+  <p>Спектр волновых ординат S_r(ω) пересчитывается в спектр волнового склона
+  S_α, затем через АЧХ — в спектр углов крена S_θ и спектр угловых ускорений
+  ω⁴S_θ. Дисперсии дают расчётные амплитуды: θ₃% = 2,64·√D_θ (обеспеченность
+  3 %) и θ_max = 3,25·√D_θ.</p>
+  <div class="panel"><div id="r-sea-steps" class="note tip"></div></div>
+
+  <h3>Спектральная таблица (ω = 0,05…2,00, шаг 0,05)</h3>
+  <div class="controls" style="font-size:13.5px">
+    <label>АЧХ в таблице
+      <select id="in-tblvar">
+        <option value="full" selected>без килей, полное уравнение</option>
+        <option value="short">без килей, укороченное</option>
+        <option value="kili">со скуловыми килями</option>
+      </select></label>
+  </div>
+  <div class="panel" style="max-height:340px;overflow:auto">
+    <table style="width:100%;border-collapse:collapse;font:13px system-ui"><tbody id="r-seatable"></tbody></table>
+  </div>
+
+  <h2>Сводная таблица</h2>
+  <p>Углы крена (D_θ в град², θ — в градусах); строка выбранной балльности подсвечена.</p>
+  <div class="panel" style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font:13.5px system-ui"><tbody id="r-summary"></tbody></table>
+  </div>
+  <p>Угловые ускорения (D_θ̈ в град²/с⁴, θ̈ — в град/с²):</p>
+  <div class="panel" style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font:13.5px system-ui"><tbody id="r-summary-acc"></tbody></table>
+  </div>
+  <p class="small">В режиме «как в работе» числа сводной таблицы при исходных
+  данных по умолчанию совпадают с работой: 6 баллов, полное уравнение —
+  θ₃% = 14,86°, θ_max = 18,30°; со скуловыми килями при 8 баллах
+  θ_max = 17,68° (против 25,14° без килей — кили срезают треть амплитуды).
+  Возможные расхождения ±0,01 — внутренние округления листа.</p>
+
+  <p>Теория — в <a href="t-rolling">главе 6 «Качка»</a>; эксперимент —
+  на странице <a href="basin">опытового бассейна</a>.</p>
+</main>
+<script src="assets/site.js" data-root="./" data-page="roll"></script>
+<script src="assets/roll.js"></script>
+</body>
+</html>

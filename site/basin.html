@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Опытовый бассейн</title>
+<meta name="description" content="Лабораторные работы в опытовом бассейне: свободные затухающие колебания модели (период и коэффициент демпфирования) и буксировочные испытания с пересчётом сопротивления по Фруду.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>Опытовый бассейн</h1>
+  <p class="lead">Две лабораторные работы кафедры теории корабля СПбГМТУ,
+  собранные в живые калькуляторы: <b>свободные затухающие колебания</b> модели
+  (по осциллограмме определяются период, частота и коэффициент демпфирования
+  бортовой качки) и <b>буксировочные испытания</b> (замеренное сопротивление
+  модели пересчитывается на натурное судно по методу Фруда). Все таблицы
+  считаются в браузере из экспериментальных точек.</p>
+
+  <h2>Лабораторная №1. Свободные затухающие колебания</h2>
+  <svg viewBox="0 0 640 240" class="geo-board" style="max-width:640px">
+    <!-- бассейн -->
+    <path d="M 20 120 L 20 210 L 300 210 L 300 120" fill="none" stroke="#16161a" stroke-width="2"/>
+    <line x1="20" y1="142" x2="300" y2="142" stroke="#155e75" stroke-width="1.6"/>
+    <path d="M 20 142 L 300 142 L 300 210 L 20 210 Z" fill="rgba(21,94,117,.10)"/>
+    <!-- модель (накренена) -->
+    <g transform="rotate(-14 160 150)">
+      <path d="M 122 128 L 122 148 Q 122 166 142 170 L 178 170 Q 198 166 198 148 L 198 128 Z" fill="#fff" stroke="#16161a" stroke-width="1.8"/>
+      <line x1="160" y1="150" x2="160" y2="96" stroke="#b3382e" stroke-width="1.3"/>
+    </g>
+    <line x1="160" y1="150" x2="160" y2="92" stroke="#6b6b74" stroke-width="1" stroke-dasharray="4 4"/>
+    <path d="M 160 106 A 44 44 0 0 0 148 108" fill="none" stroke="#b3382e" stroke-width="1.4" marker-end="url(#arrE)"/>
+    <text x="141" y="100" style="font:italic 14px Georgia,serif;fill:#b3382e">θ</text>
+    <text x="28" y="136" style="font:11px system-ui;fill:#155e75">тихая вода</text>
+    <text x="120" y="226" style="font:11.5px system-ui;fill:#6b6b74">модель после начального крена</text>
+    <!-- датчик угла → осциллограф -->
+    <path d="M 178 118 C 240 76 280 70 330 70" fill="none" stroke="#6b6b74" stroke-width="1.1" stroke-dasharray="3 3"/>
+    <rect x="330" y="40" width="290" height="140" rx="8" fill="#fff" stroke="#16161a" stroke-width="1.8"/>
+    <text x="340" y="58" style="font:11.5px system-ui;fill:#6b6b74">осциллограф: запись θ(t)</text>
+    <!-- затухающая синусоида: θ = 42·exp(-0.11 t)·cos -->
+    <path d="M 345 110 C 350 80 355 74 360 74 C 368 74 374 140 382 140 C 389 140 394 82 401 82 C 408 82 413 134 420 134 C 427 134 432 88 438 88 C 445 88 450 129 456 129 C 463 129 467 93 473 93 C 480 93 484 125 490 125 C 497 125 501 97 507 97 C 513 97 517 122 523 122 C 530 122 534 100 540 100 C 546 100 550 119 556 119 C 562 119 566 102 572 102 C 578 102 582 117 588 117 C 594 117 598 104 604 104 C 608 104 611 112 614 112" fill="none" stroke="#155e75" stroke-width="1.6"/>
+    <!-- огибающие -->
+    <path d="M 348 76 C 420 84 520 98 616 105" fill="none" stroke="#b3382e" stroke-width="1.2" stroke-dasharray="5 4"/>
+    <path d="M 348 144 C 420 136 520 122 616 115" fill="none" stroke="#b3382e" stroke-width="1.2" stroke-dasharray="5 4"/>
+    <text x="470" y="76" style="font:11px system-ui;fill:#b3382e">огибающие</text>
+    <!-- размах l -->
+    <line x1="382" y1="85" x2="382" y2="139" stroke="#16161a" stroke-width="1" marker-start="url(#arrS)" marker-end="url(#arrE)"/>
+    <text x="386" y="128" style="font:italic 12.5px Georgia,serif;fill:#16161a">l₂</text>
+    <line x1="345" y1="110" x2="616" y2="110" stroke="#6b6b74" stroke-width=".7"/>
+    <!-- отсечки времени -->
+    <line x1="360" y1="164" x2="540" y2="164" stroke="#16161a" stroke-width="1" marker-start="url(#arrS)" marker-end="url(#arrE)"/>
+    <text x="404" y="177" style="font:11.5px system-ui;fill:#16161a">T_n = n полных колебаний</text>
+  </svg>
+  <p class="small">Схема опыта: модель наклоняют и отпускают; датчик угла пишет
+  осциллограмму затухающих колебаний. По отсечкам времени снимают период, по
+  вертикальным расстояниям между огибающими — размахи l_i.</p>
+
+  <div class="panel">
+    <div class="controls" style="font-size:13.5px">
+      <label>K_θ, °/мм <input type="number" id="l1-K" value="0.39" step="0.01" style="width:74px"></label>
+      <label>T_n, с <input type="number" id="l1-Tn" value="10.7" step="0.1" style="width:74px"></label>
+      <label>n колебаний <input type="number" id="l1-n" value="9" step="1" style="width:64px"></label>
+    </div>
+    <div id="l1-steps" class="note tip"></div>
+  </div>
+
+  <h3>Обработка 19 размахов</h3>
+  <div class="panel" style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font:13px system-ui"><tbody id="l1-table"></tbody></table>
+    <p class="small" style="margin:8px 2px 2px">Слева — формула Благовещенского
+    (через Δθ_испр и θ_ср), справа — логарифмическая (через Δln_испр).</p>
+  </div>
+
+  <h3>Зависимость демпфирования от амплитуды</h3>
+  <div class="panel">
+    <div id="l1-chart"></div>
+    <p class="small" id="l1-last" style="margin:8px 2px 2px"></p>
+  </div>
+
+  <h2>Лабораторная №2. Буксировочные испытания</h2>
+  <svg viewBox="0 0 640 230" class="geo-board" style="max-width:640px">
+    <!-- рельсы и тележка -->
+    <line x1="20" y1="60" x2="620" y2="60" stroke="#16161a" stroke-width="2.4"/>
+    <line x1="20" y1="66" x2="620" y2="66" stroke="#16161a" stroke-width="1"/>
+    <rect x="250" y="28" width="150" height="30" rx="5" fill="#fff" stroke="#16161a" stroke-width="1.8"/>
+    <circle cx="276" cy="62" r="7" fill="#fff" stroke="#16161a" stroke-width="1.6"/>
+    <circle cx="374" cy="62" r="7" fill="#fff" stroke="#16161a" stroke-width="1.6"/>
+    <text x="262" y="48" style="font:12px system-ui;fill:#16161a">тележка</text>
+    <line x1="410" y1="43" x2="470" y2="43" stroke="#b3382e" stroke-width="1.4" marker-end="url(#arrE)"/>
+    <text x="424" y="36" style="font:italic 13px Georgia,serif;fill:#b3382e">v</text>
+    <!-- вода -->
+    <path d="M 20 140 L 20 210 L 620 210 L 620 140" fill="none" stroke="#16161a" stroke-width="2"/>
+    <line x1="20" y1="152" x2="620" y2="152" stroke="#155e75" stroke-width="1.6"/>
+    <path d="M 20 152 L 620 152 L 620 210 L 20 210 Z" fill="rgba(21,94,117,.10)"/>
+    <!-- подвес с динамометром и модель -->
+    <line x1="325" y1="58" x2="325" y2="118" stroke="#16161a" stroke-width="1.4"/>
+    <rect x="313" y="82" width="24" height="16" rx="3" fill="#fff" stroke="#b3382e" stroke-width="1.6"/>
+    <text x="344" y="95" style="font:11.5px system-ui;fill:#b3382e">датчик силы R</text>
+    <path d="M 262 132 L 388 132 L 388 152 Q 388 172 360 176 L 296 176 Q 268 170 264 152 Z" fill="#fff" stroke="#16161a" stroke-width="1.8"/>
+    <path d="M 262 132 L 250 152 L 264 152" fill="#fff" stroke="#16161a" stroke-width="1.6"/>
+    <text x="296" y="148" style="font:11.5px system-ui;fill:#16161a">модель, L_м = 2,41 м</text>
+    <!-- гравитационный привод -->
+    <circle cx="600" cy="72" r="10" fill="#fff" stroke="#16161a" stroke-width="1.6"/>
+    <line x1="400" y1="43" x2="596" y2="64" stroke="#6b6b74" stroke-width="1.1"/>
+    <line x1="610" y1="72" x2="610" y2="112" stroke="#6b6b74" stroke-width="1.1"/>
+    <rect x="600" y="112" width="20" height="24" fill="#eceae3" stroke="#16161a" stroke-width="1.4"/>
+    <text x="452" y="100" style="font:11px system-ui;fill:#6b6b74">гравитационный привод:</text>
+    <text x="452" y="113" style="font:11px system-ui;fill:#6b6b74">груз через блок тянет тележку</text>
+    <text x="28" y="226" style="font:11.5px system-ui;fill:#6b6b74">гравитационный опытовый бассейн: на каждом режиме замеряются скорость v и сила R</text>
+  </svg>
+
+  <div class="panel">
+    <div class="controls" style="font-size:13.5px">
+      <label>масштаб модели
+        <select id="l2-scale">
+          <option value="45" selected>1:45 (вариант 1 — как в работе)</option>
+          <option value="60">1:60 (вариант 2)</option>
+          <option value="50">1:50 (вариант 3)</option>
+          <option value="40">1:40 (вариант 4)</option>
+        </select></label>
+      <label>режим для подстановок
+        <select id="l2-run"><option>1</option><option>2</option><option>3</option><option>4</option>
+          <option selected>5</option><option>6</option><option>7</option><option>8</option></select></label>
+    </div>
+    <p class="small" style="margin:4px 2px">Модель: L_м = 2,41 м; Ω_м = 1,337 м²; δ = 0,671;
+    ν_м = 1,006·10⁻⁶ м²/с (пресная вода 16°), ν_н = 1,068·10⁻⁶ м²/с (морская 4°);
+    надбавки: шероховатость C_a = 0,0003, выступающие части C_ап = 0,00015.</p>
+    <div id="l2-steps" class="note tip"></div>
+  </div>
+
+  <h3>Все 8 режимов</h3>
+  <div class="panel" style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font:13px system-ui"><tbody id="l2-table"></tbody></table>
+    <p class="small" style="margin:8px 2px 2px">* Честное примечание: на трёх
+    малых скоростях остаточное сопротивление получилось R_r &lt; 0 и принято
+    нулём — на малой модели при Re &lt; 2·10⁶ пограничный слой частично
+    ламинарный, и турбулентный экстраполятор трения 0,075/(lg Re − 2)²
+    завышает R_f0. Это известный дефект испытаний маленьких моделей; в больших
+    бассейнах на нос модели ставят турбулизаторы.</p>
+  </div>
+
+  <h3>Кривые сопротивления</h3>
+  <div class="panel">
+    <div class="boards">
+      <div id="l2-chart-m"></div>
+      <div id="l2-chart-n"></div>
+    </div>
+    <p class="caption">Красная точка — режим, выбранный для подстановок. Излом
+    вверх после Fr ≈ 0,25 — рост волнового сопротивления.</p>
+  </div>
+
+  <p>Теория качки — <a href="t-rolling">глава 6</a>; полный расчёт бортовой
+  качки — <a href="roll">решатель качки</a>.</p>
+</main>
+<script src="assets/site.js" data-root="./" data-page="basin"></script>
+<script src="assets/basin.js"></script>
+</body>
+</html>

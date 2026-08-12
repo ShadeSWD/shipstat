@@ -15,6 +15,8 @@
     { href: '', key: 'index', title: 'Главная' },
     { href: 'solver', key: 'solver', title: 'Решатель: гидростатика и ДСО' },
     { href: 'theory', key: 'theory', title: 'Теория' },
+    { href: 'roll', key: 'roll', title: 'Качка' },
+    { href: 'basin', key: 'basin', title: 'Бассейн' },
     { href: 'modern', key: 'modern', title: 'Современные критерии' },
     { href: 'sources', key: 'sources', title: 'Источники' },
   ];
