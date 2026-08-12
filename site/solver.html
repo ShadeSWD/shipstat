@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Курсовая по статике корабля: гидростатика, кривые элементов, ДСО</title>
+<meta name="description" content="Живой расчёт курсовой по теории корабля: элементы теоретического чертежа, метацентрическая высота, диаграмма статической остойчивости и проверка критериев ИМО — всё в браузере.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>Курсовая: гидростатика и остойчивость</h1>
+  <p class="lead">Тот же состав, что в курсовой по статике корабля: по корпусу
+  строятся <b>кривые элементов теоретического чертежа</b>, считается посадка и
+  начальная остойчивость, затем — <b>диаграмма статической остойчивости</b>
+  (плечи считаются честными наклонениями корпуса с подбором ватерлинии по
+  объёму) и проверка по критериям Кодекса ОСНС. Меняйте корпус и нагрузку —
+  всё пересчитывается на лету.</p>
+
+  <div class="panel">
+    <div class="controls">
+      <label>осадка T <input type="range" id="in-T" min="2" max="8" step="0.1" value="5.6">
+        <span class="readout" id="out-T"></span></label>
+      <label>z<sub>g</sub> (центр тяжести) <input type="range" id="in-zg" min="2.5" max="8" step="0.1" value="4.8">
+        <span class="readout" id="out-zg"></span></label>
+      <label>ширина B <input type="range" id="in-B" min="12" max="20" step="0.5" value="16">
+        <span class="readout" id="out-B"></span></label>
+      <label>полнота шпангоута <input type="range" id="in-full" min="0.3" max="0.92" step="0.02" value="0.62">
+        <span class="readout" id="out-full"></span></label>
+      <label>высота скулы <input type="range" id="in-bilge" min="2" max="8" step="0.2" value="5.6">
+        <span class="readout" id="out-bilge"></span></label>
+    </div>
+    <div class="boards">
+      <div style="flex:1 1 480px">
+        <div id="b-hullsketch"></div>
+        <div class="caption">Корпус: ватерлинии в плане и мидель-шпангоут с текущей ВЛ</div>
+      </div>
+      <div style="flex:1 1 380px">
+        <h3 style="margin-top:0">Элементы при осадке T</h3>
+        <table style="width:100%;border-collapse:collapse;font:14px system-ui" class="tbl">
+          <tbody id="out-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <h2>Кривые элементов теоретического чертежа</h2>
+  <p>Классический лист курсовой: зависимости элементов от осадки. Красный
+  пунктир — текущая осадка; наведите мышь на кривую, чтобы снять значение
+  (в третьем графике серым пунктиром — x<sub>f</sub>, в последнем — z<sub>g</sub>).</p>
+  <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
+    <div class="card"><div id="c-V"></div></div>
+    <div class="card"><div id="c-S"></div></div>
+    <div class="card"><div id="c-xc"></div></div>
+    <div class="card"><div id="c-zc"></div></div>
+    <div class="card"><div id="c-r"></div></div>
+    <div class="card"><div id="c-KM"></div></div>
+  </div>
+
+  <h2>Диаграмма статической остойчивости</h2>
+  <p>Каждая точка — честное наклонение: контуры всех 41 шпангоута поворачиваются
+  на угол θ, уровень воды подбирается бисекцией так, чтобы погруженный объём
+  остался равным V, и плечо l = y<sub>g</sub> − y<sub>c</sub> снимается по
+  положению центра величины. Серый пунктир — касательная в нуле: при 57,3°
+  (1 рад) она проходит через значение метацентрической высоты h — классическая
+  графическая проверка диаграммы.</p>
+  <div class="panel">
+    <div id="c-gz"></div>
+    <h3>Проверка по критериям (Кодекс ОСНС 2008, общая часть)</h3>
+    <table style="width:100%;border-collapse:collapse;font:14px system-ui">
+      <tbody id="crit-table"></tbody>
+    </table>
+    <p><span class="badge" id="crit-verdict"></span></p>
+    <p class="small">Критерий погоды (K ≥ 1) требует кренящего момента от ветра и
+    амплитуды качки — он разобран в <a href="theory">теории</a>; численные
+    значения общих критериев — по Кодексу ОСНС/правилам РС (см.
+    <a href="sources">источники</a>).</p>
+  </div>
+
+  <h2>Что дальше</h2>
+  <p>Во второй части курса — качка (см. <a href="theory">теорию</a>) и
+  <a href="modern">современные критерии остойчивости второго поколения ИМО</a>.
+  Выбор варианта обводов — многокритериальная задача: полнота даёт вместимость,
+  но портит ходкость; ширина лечит остойчивость, но растит сопротивление —
+  такие развилки считает <a href="https://shadeswd.duckdns.org/relmet/">Relation
+  Metrics</a>. Теоретический чертёж, по которому всё это строится, разобран
+  на соседнем сайте: <a href="https://shadeswd.duckdns.org/descgeo/demo/hull">теоретический
+  чертёж судна</a>.</p>
+</main>
+<script src="assets/site.js" data-root="./" data-page="solver"></script>
+<script src="assets/geo.js"></script>
+<script src="assets/hydro.js"></script>
+<script src="assets/solver.js"></script>
+</body>
+</html>

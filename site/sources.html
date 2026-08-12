@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Источники: учебники, Кодекс ОСНС, правила Регистра</title>
+<meta name="description" content="Литература по статике корабля: Кодекс ОСНС 2008 (MSC.267(85)), правила РС часть IV, SGISC MSC.1/Circ.1627, учебники Семёнова-Тян-Шанского и Борисова, современные статьи.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>Источники и литература</h1>
+  <p class="lead">Все нормативные числа сайта (критерии ДСО, критерий погоды,
+  формулы SGISC) выверены по первоисточникам — официальным текстам ИМО и
+  Российского морского регистра судоходства. Даты обращения: 12.08.2026.</p>
+
+  <h2>Нормативные документы</h2>
+  <ol class="bib">
+    <li>International Code on Intact Stability, 2008 (2008 IS Code) :
+      resolution MSC.267(85). — IMO, 2008. —
+      <span class="bib-url"><a href="https://www.deutsche-flagge.de/de/redaktion/dokumente/interpretationen/solas/ii-1/resolution-msc-267-85-adoption-of-the-international-code-on-intact-stability-2008.pdf/@@download/file/RESOLUTION%20MSC.267(85)%20-%20ADOPTION%20OF%20THE%20INTERNATIONAL%20CODE%20ON%20INTACT%20STABILITY,%202008.pdf">официальный PDF</a>,
+      <a href="https://www.imorules.com/MSCRES_267.85.html">HTML-версия</a></span> —
+      критерии п. 2.2 (площади 0,055/0,09/0,03 м·рад; плечо 0,2 м при 30°;
+      максимум ≥ 25°; GM₀ ≥ 0,15 м) и критерий погоды п. 2.3.</li>
+    <li>Правила классификации и постройки морских судов. Ч. IV «Остойчивость». —
+      СПб. : Российский морской регистр судоходства, 2018. — НД № 2-020101-104. —
+      <span class="bib-url"><a href="https://rs-class.org/upload/iblock/615/61588b04715770bc030a3a1a26f8b084.pdf">PDF на rs-class.org</a></span> —
+      требования РС строже ИМО: l<sub>max</sub> ≥ 0,25 м (L ≤ 80 м) при
+      θ<sub>max</sub> ≥ 30°; давление ветра по районам плавания 504/353/252 Па.</li>
+    <li>Interim Guidelines on the Second Generation Intact Stability Criteria :
+      MSC.1/Circ.1627. — IMO, 10.12.2020. —
+      <span class="bib-url"><a href="https://www.liscr.com/sites/default/files/MSC.1-Circ.1627.pdf">PDF</a>,
+      <a href="https://www.imorules.com/MSCCIRC_1627.html">HTML</a></span> —
+      пять отказных режимов; формулы уровня 1, реализованные на странице
+      <a href="modern">«Современные критерии»</a>.</li>
+  </ol>
+
+  <h2>Учебники</h2>
+  <ol class="bib">
+    <li>Семёнов-Тян-Шанский В. В. Статика и динамика корабля: Плавучесть,
+      остойчивость и спуск на воду. — 3-е изд. — Л. : Судостроение, 1973. — 607 с. —
+      <span class="bib-url"><a href="https://search.rsl.ru/ru/record/01007438494">открытый полный текст в РГБ</a></span></li>
+    <li>Борисов Р. В., Луговский В. В., Мирохин Б. В., Рождественский В. В.
+      Статика корабля : учеб. пособие. — 2-е изд. — СПб. : Судостроение, 2005. —
+      базовый учебник ЛКИ/СПбГМТУ. —
+      <span class="bib-url"><a href="https://rusneb.ru/catalog/004191_000025_DONPB-RU+SML%7C%7C%7CBIBL%7C%7C%7C0000002797/">запись НЭБ</a></span></li>
+    <li>Справочник по теории корабля : в 3 т. / под ред. Я. И. Войткунского. —
+      Л. : Судостроение, 1985. — Т. 2 : Статика судов. Качка судов. —
+      <span class="bib-url"><a href="https://search.rsl.ru/ru/record/01001269973">запись РГБ</a></span></li>
+    <li>Кочнев Ю. А. Статика корабля : учеб.-метод. пособие к курсовому
+      проекту. — 2017. —
+      <span class="bib-url"><a href="https://rusneb.ru/catalog/000199_000009_008875564/">запись НЭБ</a></span></li>
+  </ol>
+
+  <h2>Формулы, использованные в расчётах</h2>
+  <ol class="bib">
+    <li>Период бортовой качки: T = 2CB/√h, C = 0,373 + 0,023·B/d −
+      0,043·L<sub>wl</sub>/100 — Кодекс ОСНС п. 2.3.4 и РС ч. IV п. 2.1.5.1
+      (обе редакции совпадают); практическая «капитанская» форма T ≈ c·B/√h,
+      c ≈ 0,73–0,88.</li>
+    <li>Метацентрический радиус r = I<sub>x</sub>/V; продольный R = I<sub>yf</sub>/V —
+      классика (Семёнов-Тян-Шанский, гл. о начальной остойчивости).</li>
+    <li>Поправка на свободные поверхности δh = Σρ<sub>ж</sub>i<sub>x</sub>/Δ —
+      Кодекс ОСНС ч. B гл. 3.1; РС ч. IV п. 1.4.7 (учёт при заполнении &lt; 98 %).</li>
+  </ol>
+
+  <h2>Современные статьи</h2>
+  <p>Подборка работ 2023–2026 с открытыми проблемами (SGISC, Maersk Essen,
+  демпфирование качки, брочинг малых судов) — на странице
+  <a href="modern">«Современные критерии»</a>, все со ссылками.</p>
+
+  <h2>Материалы курса</h2>
+  <p>Сайт построен по структуре курсовых работ курса «Теория корабля»
+  СПбГМТУ (статика: кривые элементов + диаграммы остойчивости; динамика:
+  качка) и проверен по перечисленным первоисточникам. Соседние сайты кластера:
+  <a href="https://shadeswd.duckdns.org/descgeo/">начертательная геометрия</a>
+  (теоретический чертёж) и
+  <a href="https://shadeswd.duckdns.org/strength/">строймех корабля</a>.</p>
+</main>
+<script src="assets/site.js" data-root="./" data-page="sources"></script>
+</body>
+</html>

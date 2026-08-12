@@ -1,0 +1,256 @@
+/* «Курсовая»: гидростатика, кривые элементов, остойчивость, ДСО, критерии. */
+'use strict';
+
+/* ---------- мини-график (одна серия, ось Y своя, тултип-кросшэйр) ---------- */
+function miniChart(host, title, unit, pts, opts = {}) {
+  const W = 300, H = 170, padL = 46, padR = 10, padT = 24, padB = 26;
+  host.innerHTML = '';
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, class: 'geo-board' }, host);
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  let y0 = Math.min(...ys, 0), y1 = Math.max(...ys);
+  if (opts.y0 !== undefined) y0 = opts.y0;
+  if (y1 - y0 < 1e-9) y1 = y0 + 1;
+  const X = v => padL + (v - x0) / (x1 - x0) * (W - padL - padR);
+  const Y = v => H - padB - (v - y0) / (y1 - y0) * (H - padT - padB);
+  // сетка (3 горизонтали) и оси — приглушённые
+  for (let k = 0; k <= 3; k++) {
+    const v = y0 + (y1 - y0) * k / 3;
+    svgEl('line', { x1: padL, y1: Y(v), x2: W - padR, y2: Y(v), stroke: '#e7e5de', 'stroke-width': 1 }, svg);
+    const t = svgEl('text', { x: padL - 4, y: Y(v) + 3, 'text-anchor': 'end' }, svg);
+    t.style.cssText = 'font:9px system-ui;fill:#8a8a92';
+    t.textContent = fmt(v, Math.abs(y1 - y0) > 30 ? 0 : 2);
+  }
+  for (const v of [x0, (x0 + x1) / 2, x1]) {
+    const t = svgEl('text', { x: X(v), y: H - 8, 'text-anchor': 'middle' }, svg);
+    t.style.cssText = 'font:9px system-ui;fill:#8a8a92';
+    t.textContent = fmt(v, 1);
+  }
+  // серия
+  svgEl('polyline', {
+    points: pts.map(p => X(p[0]).toFixed(1) + ',' + Y(p[1]).toFixed(1)).join(' '),
+    fill: 'none', stroke: opts.color || '#155e75', 'stroke-width': 2,
+    'stroke-linejoin': 'round',
+  }, svg);
+  // доп. серия (например касательная)
+  if (opts.extra) {
+    svgEl('polyline', {
+      points: opts.extra.map(p => X(p[0]).toFixed(1) + ',' + Y(p[1]).toFixed(1)).join(' '),
+      fill: 'none', stroke: '#9a9aa2', 'stroke-width': 1.4, 'stroke-dasharray': '5 4',
+    }, svg);
+  }
+  if (opts.marks) {
+    for (const m of opts.marks) {
+      svgEl('line', { x1: X(m.x), y1: padT, x2: X(m.x), y2: H - padB, stroke: '#b3382e', 'stroke-width': 1, 'stroke-dasharray': '3 3' }, svg);
+      const t = svgEl('text', { x: X(m.x) + 3, y: padT + 9 }, svg);
+      t.style.cssText = 'font:9px system-ui;fill:#b3382e';
+      t.textContent = m.label;
+    }
+  }
+  // заголовок
+  const tt = svgEl('text', { x: padL, y: 14 }, svg);
+  tt.style.cssText = 'font:600 11.5px system-ui;fill:#3a3a42';
+  tt.textContent = title + (unit ? `, ${unit}` : '');
+  // ховер: кросшэйр + значение
+  const hoverLn = svgEl('line', { y1: padT, y2: H - padB, stroke: '#155e75', 'stroke-width': 1, opacity: 0 }, svg);
+  const hoverDot = svgEl('circle', { r: 3.4, fill: opts.color || '#155e75', opacity: 0 }, svg);
+  const hoverTx = svgEl('text', { opacity: 0 }, svg);
+  hoverTx.style.cssText = 'font:600 10.5px system-ui;fill:#16161a;paint-order:stroke;stroke:#ffffffdd;stroke-width:3px';
+  svg.addEventListener('pointermove', ev => {
+    const r = svg.getBoundingClientRect();
+    const vx = x0 + ((ev.clientX - r.left) / r.width * W - padL) / (W - padL - padR) * (x1 - x0);
+    let best = pts[0];
+    for (const p of pts) if (Math.abs(p[0] - vx) < Math.abs(best[0] - vx)) best = p;
+    hoverLn.setAttribute('x1', X(best[0])); hoverLn.setAttribute('x2', X(best[0]));
+    hoverDot.setAttribute('cx', X(best[0])); hoverDot.setAttribute('cy', Y(best[1]));
+    hoverTx.setAttribute('x', Math.min(X(best[0]) + 6, W - 74));
+    hoverTx.setAttribute('y', Math.max(Y(best[1]) - 8, padT + 10));
+    hoverTx.textContent = `${fmt(best[0], 1)} → ${fmt(best[1], 2)}`;
+    for (const e of [hoverLn, hoverDot, hoverTx]) e.setAttribute('opacity', 1);
+  });
+  svg.addEventListener('pointerleave', () => {
+    for (const e of [hoverLn, hoverDot, hoverTx]) e.setAttribute('opacity', 0);
+  });
+}
+
+/* ---------- состояние и управление ---------- */
+const stS = { T: 5.6, zg: 4.8, Bh: 16, full: 0.62, bilge: 5.6, curve: null };
+
+function applyHullParams() {
+  HULL.W[1][1] = stS.Bh / 2 * 1.025;
+  HULL.W[2][1] = stS.Bh / 2 * 0.99;
+  HULL.S[1][0] = stS.full;           // полнота (скуловая точка вбок)
+  HULL.S[2][1] = stS.bilge;          // высота выхода борта
+}
+
+function drawHullSketch() {
+  const B = new Board('#b-hullsketch', { w: 640, h: 300 });
+  B.clear();
+  // полуширота (вид сверху) и мидель
+  const sx = 40, sy = 90, kx = 3.4, ky = 6;
+  for (const f of [0.25, 0.5, 0.75, 1]) {
+    const pts = [];
+    for (let i = 0; i <= 48; i++) {
+      const x = i / 48 * HULL.L;
+      pts.push([sx + x * kx, sy + yHull(x, HULL.H * f) * ky]);
+    }
+    B.poly(pts, f === 1 ? 'ln blue' : 'ln-thin blue', 'main');
+  }
+  B.line([sx, sy], [sx + HULL.L * kx, sy], 'ln-axis');
+  B.label([sx + HULL.L * kx - 30, sy - 6], 'ДП (план)', 'gray', 0, 0);
+  // мидель-шпангоут с осадкой
+  const mx = 470, myb = 285, kk = 14;
+  const sec = [];
+  for (let i = 0; i <= 30; i++) {
+    const z = i / 30 * HULL.H;
+    sec.push([mx + yHull(HULL.L / 2, z) * kk, myb - z * kk]);
+  }
+  B.poly(sec, 'ln', 'main');
+  B.poly(sec.map(p => [2 * mx - p[0], p[1]]), 'ln', 'main');
+  B.line([mx, myb], [mx, myb - HULL.H * kk], 'ln-thin gray ln-dash');
+  // ватерлиния
+  B.line([mx - 9.6 * kk, myb - stS.T * kk], [mx + 9.6 * kk, myb - stS.T * kk], 'ln blue');
+  B.label([mx + 9.6 * kk - 22, myb - stS.T * kk - 6], 'ВЛ', 'blue', 0, 0);
+  B.label([mx - 30, myb - HULL.H * kk - 8], 'мидель', 'gray', 0, 0);
+}
+
+function recompute() {
+  applyHullParams();
+  drawHullSketch();
+  const h = hydrostatics(stS.T);
+  const rho = 1.025;
+  document.getElementById('out-table').innerHTML = `
+    <tr><td>Объёмное водоизмещение V</td><td>${fmt(h.V, 0)} м³</td></tr>
+    <tr><td>Весовое водоизмещение D = ρV</td><td>${fmt(h.V * rho, 0)} т</td></tr>
+    <tr><td>Площадь ватерлинии S</td><td>${fmt(h.Awl, 0)} м²</td></tr>
+    <tr><td>Абсцисса центра величины x<sub>c</sub></td><td>${fmt(h.xc - HULL.L / 2, 2)} м от миделя</td></tr>
+    <tr><td>Абсцисса центра тяжести ВЛ x<sub>f</sub></td><td>${fmt(h.xf - HULL.L / 2, 2)} м от миделя</td></tr>
+    <tr><td>Аппликата центра величины z<sub>c</sub></td><td>${fmt(h.zc, 2)} м</td></tr>
+    <tr><td>Метацентрический радиус r = I<sub>x</sub>/V</td><td>${fmt(h.r, 2)} м</td></tr>
+    <tr><td>Продольный радиус R = I<sub>yf</sub>/V</td><td>${fmt(h.R, 0)} м</td></tr>
+    <tr><td>Аппликата метацентра z<sub>m</sub> = z<sub>c</sub> + r</td><td>${fmt(h.KM, 2)} м</td></tr>
+    <tr><td><b>Метацентрическая высота h = z<sub>m</sub> − z<sub>g</sub></b></td>
+        <td><b>${fmt(h.KM - stS.zg, 2)} м</b></td></tr>
+    <tr><td>Период бортовой качки T<sub>θ</sub> ≈ 0,8·B/√h</td>
+        <td>${h.KM - stS.zg > 0.02 ? fmt(0.8 * stS.Bh / Math.sqrt(h.KM - stS.zg), 1) + ' с' : '—'}</td></tr>`;
+
+  // кривые элементов (малые кратные)
+  const Ts = [], data = { V: [], S: [], xc: [], xf: [], zc: [], r: [], KM: [] };
+  for (let t = 1; t <= 8.01; t += 0.35) {
+    const hh = hydrostatics(t);
+    data.V.push([t, hh.V]); data.S.push([t, hh.Awl]);
+    data.xc.push([t, hh.xc - HULL.L / 2]); data.xf.push([t, hh.xf - HULL.L / 2]);
+    data.zc.push([t, hh.zc]); data.r.push([t, hh.r]); data.KM.push([t, hh.KM]);
+  }
+  const mark = [{ x: stS.T, label: 'T' }];
+  miniChart(document.getElementById('c-V'), 'Водоизмещение V', 'м³', data.V, { marks: mark });
+  miniChart(document.getElementById('c-S'), 'Площадь ВЛ S', 'м²', data.S, { marks: mark });
+  miniChart(document.getElementById('c-xc'), 'x꜀ и x_f от миделя', 'м', data.xc, { extra: data.xf, marks: mark });
+  miniChart(document.getElementById('c-zc'), 'Центр величины z꜀', 'м', data.zc, { marks: mark });
+  miniChart(document.getElementById('c-r'), 'Метацентрич. радиус r', 'м', data.r, { marks: mark });
+  miniChart(document.getElementById('c-KM'), 'Метацентр z_m', 'м', data.KM, { marks: mark, extra: [[1, stS.zg], [8, stS.zg]] });
+
+  // ДСО
+  const V0 = h.V, zg = stS.zg;
+  const curve = gzCurve(V0, zg, 80, 5);
+  stS.curve = curve;
+  const hMeta = h.KM - zg;
+  miniChartBig(document.getElementById('c-gz'), curve, hMeta);
+  criteria(curve, hMeta);
+}
+
+/* большой график ДСО */
+function miniChartBig(host, curve, hMeta) {
+  host.innerHTML = '';
+  const W = 640, H = 300, padL = 50, padR = 14, padT = 20, padB = 30;
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, class: 'geo-board' }, host);
+  const ls = curve.map(c => c.l);
+  const y1 = Math.max(...ls, 0.3), y0 = Math.min(...ls, -0.1);
+  const X = d => padL + d / 80 * (W - padL - padR);
+  const Y = v => H - padB - (v - y0) / (y1 - y0) * (H - padT - padB);
+  for (let v = Math.ceil(y0 * 5) / 5; v <= y1 + 1e-9; v += 0.2) {
+    svgEl('line', { x1: padL, y1: Y(v), x2: W - padR, y2: Y(v), stroke: v === 0 ? '#b9b9c0' : '#e7e5de', 'stroke-width': v === 0 ? 1.4 : 1 }, svg);
+    const t = svgEl('text', { x: padL - 5, y: Y(v) + 3, 'text-anchor': 'end' }, svg);
+    t.style.cssText = 'font:10px system-ui;fill:#8a8a92';
+    t.textContent = fmt(v, 1);
+  }
+  for (let d = 0; d <= 80; d += 10) {
+    svgEl('line', { x1: X(d), y1: H - padB, x2: X(d), y2: H - padB + 4, stroke: '#b9b9c0' }, svg);
+    const t = svgEl('text', { x: X(d), y: H - 10, 'text-anchor': 'middle' }, svg);
+    t.style.cssText = 'font:10px system-ui;fill:#8a8a92';
+    t.textContent = d + '°';
+  }
+  // касательная в нуле: l = h·θ(рад); при 1 рад (57.3°) значение h
+  svgEl('polyline', {
+    points: [[0, 0], [57.29, hMeta]].map(p => X(p[0]) + ',' + Y(p[1])).join(' '),
+    fill: 'none', stroke: '#9a9aa2', 'stroke-width': 1.3, 'stroke-dasharray': '5 4',
+  }, svg);
+  svgEl('line', { x1: X(57.29), y1: Y(0), x2: X(57.29), y2: Y(hMeta), stroke: '#9a9aa2', 'stroke-width': 1, 'stroke-dasharray': '2 3' }, svg);
+  const th = svgEl('text', { x: X(57.29) + 4, y: Y(hMeta / 2) }, svg);
+  th.style.cssText = 'font:10.5px system-ui;fill:#6b6b74';
+  th.textContent = 'h (при 57,3°)';
+  svgEl('polyline', {
+    points: curve.map(c => X(c.deg).toFixed(1) + ',' + Y(c.l).toFixed(1)).join(' '),
+    fill: 'none', stroke: '#155e75', 'stroke-width': 2.4, 'stroke-linejoin': 'round',
+  }, svg);
+  const tt = svgEl('text', { x: padL, y: 13 }, svg);
+  tt.style.cssText = 'font:600 12px system-ui;fill:#3a3a42';
+  tt.textContent = 'Диаграмма статической остойчивости: плечо l(θ), м';
+  // ховер
+  const hd = svgEl('circle', { r: 4, fill: '#155e75', opacity: 0 }, svg);
+  const htx = svgEl('text', { opacity: 0 }, svg);
+  htx.style.cssText = 'font:600 11px system-ui;fill:#16161a;paint-order:stroke;stroke:#ffffffdd;stroke-width:3px';
+  svg.addEventListener('pointermove', ev => {
+    const r = svg.getBoundingClientRect();
+    const d = (ev.clientX - r.left) / r.width * W;
+    let best = curve[0];
+    for (const c of curve) if (Math.abs(X(c.deg) - d) < Math.abs(X(best.deg) - d)) best = c;
+    hd.setAttribute('cx', X(best.deg)); hd.setAttribute('cy', Y(best.l));
+    htx.setAttribute('x', Math.min(X(best.deg) + 8, W - 100));
+    htx.setAttribute('y', Y(best.l) - 10);
+    htx.textContent = `θ=${best.deg}°  l=${fmt(best.l, 2)} м`;
+    hd.setAttribute('opacity', 1); htx.setAttribute('opacity', 1);
+  });
+  svg.addEventListener('pointerleave', () => { hd.setAttribute('opacity', 0); htx.setAttribute('opacity', 0); });
+}
+
+/* критерии ИМО (Кодекс ОСНС 2008, общая часть) */
+function criteria(curve, hMeta) {
+  const A30 = gzArea(curve, 30), A40 = gzArea(curve, 40);
+  const l30 = curve.find(c => c.deg === 30).l;
+  let lmax = -1, degMax = 0;
+  for (const c of curve) if (c.l > lmax) { lmax = c.l; degMax = c.deg; }
+  const rows = [
+    ['Площадь под ДСО до 30° ≥ 0,055 м·рад', A30, 0.055, A30 >= 0.055],
+    ['Площадь до 40° ≥ 0,09 м·рад', A40, 0.09, A40 >= 0.09],
+    ['Площадь 30–40° ≥ 0,03 м·рад', A40 - A30, 0.03, A40 - A30 >= 0.03],
+    ['Плечо при 30° ≥ 0,20 м', l30, 0.2, l30 >= 0.2],
+    ['Угол максимума ДСО ≥ 25°', degMax, 25, degMax >= 25],
+    ['Начальная метацентрическая высота ≥ 0,15 м', hMeta, 0.15, hMeta >= 0.15],
+  ];
+  document.getElementById('crit-table').innerHTML = rows.map(([name, val, lim, ok]) => `
+    <tr><td>${name}</td><td>${fmt(val, 3)}</td>
+    <td><span class="badge ${ok ? 'ok' : 'bad'}">${ok ? 'выполнен' : 'НЕ выполнен'}</span></td></tr>`).join('');
+  const all = rows.every(r => r[3]);
+  const b = document.getElementById('crit-verdict');
+  b.className = 'badge ' + (all ? 'ok' : 'bad');
+  b.textContent = all ? 'судно удовлетворяет основным критериям Кодекса ОСНС'
+    : 'судно НЕ проходит по критериям — поднимите борт, увеличьте ширину или опустите z_g';
+}
+
+/* ---------- контролы ---------- */
+for (const [id, key, out, unit] of [
+  ['in-T', 'T', 'out-T', ' м'], ['in-zg', 'zg', 'out-zg', ' м'],
+  ['in-B', 'Bh', 'out-B', ' м'], ['in-full', 'full', 'out-full', ''],
+  ['in-bilge', 'bilge', 'out-bilge', ' м'],
+]) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', e => {
+    stS[key] = +e.target.value;
+    document.getElementById(out).textContent = e.target.value + unit;
+    clearTimeout(window.__rct);
+    window.__rct = setTimeout(recompute, 120);
+  });
+  document.getElementById(out).textContent = el.value + unit;
+}
+recompute();

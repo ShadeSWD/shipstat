@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Критерии остойчивости второго поколения (SGISC) — живая проверка</title>
+<meta name="description" content="SGISC MSC.1/Circ.1627: пять отказных режимов, живой калькулятор уровня 1 для чистой потери остойчивости и параметрической качки, разбор аварии Maersk Essen и открытые проблемы области.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>Критерии второго поколения (SGISC)</h1>
+  <p class="lead">Классические критерии ИМО смотрят только на ДСО на тихой воде.
+  Но суда теряют остойчивость и <b>динамически</b> — на попутной волне, в
+  параметрическом резонансе, при брочинге. Ответ ИМО — <b>критерии
+  остойчивости второго поколения</b> (SGISC, циркуляр MSC.1/Circ.1627,
+  2020): пять отказных режимов, для каждого — три уровня проверки от простой
+  формулы до прямого моделирования. Это самая живая тема современной теории
+  корабля — и уровень 1 двух главных режимов можно посчитать прямо здесь.</p>
+
+  <h2>Пять отказных режимов</h2>
+  <ul>
+    <li><b>Pure loss of stability</b> — чистая потеря остойчивости: на гребне
+    попутной волны ватерлиния сужается, I<sub>x</sub> падает, GM уходит в ноль;</li>
+    <li><b>Parametric rolling</b> — параметрическая качка: GM колеблется с
+    частотой волны, и при T<sub>E</sub> ≈ T<sub>θ</sub>/2 крен раскачивается до
+    десятков градусов (главный убийца контейнеровозов);</li>
+    <li><b>Surf-riding / broaching</b> — захват волной и разворот лагом;</li>
+    <li><b>Dead ship condition</b> — обесточенное судно лагом к волне;</li>
+    <li><b>Excessive accelerations</b> — чрезмерные ускорения при излишне
+    высоком GM.</li>
+  </ul>
+
+  <h2>Живая проверка уровня 1</h2>
+  <p>Формулы циркуляра, посчитанные честной гидростатикой нашего параметрического
+  корпуса: «посадка на гребень» — это расчёт I<sub>x</sub> ватерлинии при
+  уменьшенной эффективной осадке d<sub>L</sub> (волна λ = L, крутизна
+  s<sub>w</sub> = 0,0334 для pure loss и 0,0167 для параметрической качки).</p>
+  <div class="panel">
+    <div class="controls">
+      <label>осадка d, м <input type="range" id="sg-d" min="3" max="8" step="0.1" value="5.6"><span class="readout" id="sg-d-o"></span></label>
+      <label>KG, м <input type="range" id="sg-kg" min="3" max="8" step="0.1" value="4.8"><span class="readout" id="sg-kg-o"></span></label>
+      <label>скорость, уз <input type="range" id="sg-vs" min="8" max="30" step="0.5" value="18"><span class="readout" id="sg-vs-o"></span></label>
+      <label>скуловые кили A<sub>k</sub>, м² <input type="range" id="sg-ak" min="0" max="30" step="1" value="6"><span class="readout" id="sg-ak-o"></span></label>
+      <label>C<sub>m</sub> <input type="range" id="sg-cm" min="0.9" max="0.995" step="0.005" value="0.98"><span class="readout" id="sg-cm-o"></span></label>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font:14px system-ui">
+      <tbody id="sg-out"></tbody>
+    </table>
+    <p class="small">Корпус — тот же, что в <a href="solver">решателе курсовой</a>
+    (изменения ширины/полноты там отражаются и здесь после обновления страницы).
+    Формулы — MSC.1/Circ.1627, пп. 2.4.2 (pure loss: GM<sub>min</sub> ≥ 0,05 м)
+    и 2.5.2 (parametric roll: δGM₁/GM ≤ R<sub>PR</sub>); пороги R<sub>PR</sub> —
+    с учётом площади скуловых килей.</p>
+  </div>
+
+  <h2>Авария, которая всё объясняет: Maersk Essen</h2>
+  <p>16 января 2021 года контейнеровоз <b>Maersk Essen</b> в Тихом океане
+  попал в параметрический резонанс и потерял ~750 контейнеров при кренах за
+  30°. Дания и Всемирный совет судоходства прогнали случай через SGISC
+  (документ IMO SDC 10/16) — и вскрыли открытые проблемы: 1-DOF расчёт
+  (NAPA) даёт «pass» там, где 6-DOF код ABS даёт «fail»; волновая статистика
+  циркуляра (Северная Атлантика) нерепрезентативна для тихоокеанской зыби;
+  циркуляр не требует совместной проверки pure loss + parametric roll, хотя
+  авария была именно их комбинацией. Проверьте сами на калькуляторе выше:
+  при высоком KG (низком GM) судно уязвимо к pure loss, при низком KG
+  (высоком GM) — уходит в отказ по параметрической качке: два режима
+  «зажимают» проектанта с двух сторон.</p>
+
+  <h2>Открытые проблемы области (что читать)</h2>
+  <ol class="bib">
+    <li>Denmark, WSC. Experiences gained on the use of the Interim guidelines
+      (MSC.1/Circ.1627): calculations for MV Maersk Essen container loss
+      accident. IMO SDC 10/16, 2023. —
+      <span class="bib-url"><a href="https://www.worldshipping.org/s/SDC-10-16-Experiences-gained-on-the-use-of-the-Interim-guidelines-on-the-second-generation-intact-st.pdf">PDF</a></span></li>
+    <li>Shin D. [et al.] Evaluation of Parametric Roll Mode Applying the IMO
+      SGISC for 13K Chemical Tanker // J. Mar. Sci. Eng. 2023. 11(7):1462. —
+      судно проваливает уровни 1 и 2A, но проходит 2B: иерархия
+      консервативности нарушается —
+      <span class="bib-url"><a href="https://doi.org/10.3390/jmse11071462">DOI</a></span></li>
+    <li>Shin D., Moon B. Design Analysis Using Evaluation of Surf-Riding and
+      Broaching by the IMO SGISC for a Small Fishing Boat // JMSE. 2024.
+      12(11):2066 — для малых судов методика не устоялась —
+      <span class="bib-url"><a href="https://doi.org/10.3390/jmse12112066">DOI</a></span></li>
+    <li>Petacco N. [et al.] An insight about roll damping within the SGISC //
+      J. Ocean Eng. Mar. Energy. 2024. 10(4) — демпфирование качки — главная
+      неопределённость уровня 2 —
+      <span class="bib-url"><a href="https://doi.org/10.1007/s40722-024-00347-9">DOI</a></span></li>
+    <li>Luthy V. [et al.] Statistical approach of the most effective manoeuvre…
+      // Proc. ISSW 2023. P. 95–104 — параметрический резонанс операционно
+      почти не избегается —
+      <span class="bib-url"><a href="https://www.shipstab.org/files/Proceedings/ISSW/ISSW_2023_Istanbul_Turkey/ISSW2023_Proceedings-25.09.2023.pdf">труды ISSW 2023 (PDF)</a></span></li>
+    <li>Maki A. [et al.] Review of the analytical prediction method of
+      surf-riding threshold… // arXiv:2406.12853 —
+      <span class="bib-url"><a href="https://arxiv.org/abs/2406.12853">arXiv</a></span></li>
+  </ol>
+  <p class="small">Сообщество и труды конференций STAB&S/ISSW — открыто на
+  <a href="http://www.shipstab.org/">shipstab.org</a>; следующая ISSW —
+  2026, Ферроль.</p>
+</main>
+<script src="assets/site.js" data-root="./" data-page="modern"></script>
+<script src="assets/geo.js"></script>
+<script src="assets/hydro.js"></script>
+<script>
+/* лёгкая заглушка параметров корпуса из solver.js (страница автономна) */
+function applyHullParams(){}
+</script>
+<script src="assets/sgisc.js"></script>
+</body>
+</html>
