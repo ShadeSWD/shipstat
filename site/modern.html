@@ -30,6 +30,34 @@ svg.fm-fig text, #sg-fig text { font: 11px system-ui, sans-serif; fill: #16161a;
 main .katex-display { overflow-x: auto; overflow-y: hidden; padding: 2px 0 6px; }
 main .katex-mathml { position: absolute; clip: rect(1px,1px,1px,1px); width: 1px; height: 1px; overflow: hidden; }
 main table { display: block; max-width: 100%; overflow-x: auto; }
+/* слой быстрого чтения: «Коротко», навигация по главе, «Что запомнить» */
+.tldr { background:#fff; border:1px solid var(--line); border-left:5px solid var(--accent);
+  border-radius:12px; padding:12px 18px; margin:18px 0 14px;
+  font:15px/1.5 system-ui, sans-serif; }
+.tldr .tt, .recap .tt, .chnav .tt { font-weight:700; font-size:16px; margin-bottom:6px; }
+.tldr ul, .recap ul { margin:6px 0; padding-left:20px; }
+.tldr li, .recap li { margin:4px 0; }
+.tldr .fl { margin:8px 0 0; padding-top:8px; border-top:1px dashed var(--line); }
+.tldr .fl div { margin:5px 0; overflow-x:auto; }
+.chnav { background:#fbfbfc; border:1px solid var(--line); border-radius:12px;
+  padding:10px 18px; margin:0 0 20px; font:15px/1.5 system-ui, sans-serif; }
+.chnav .up { margin-bottom:6px; font-size:14px; }
+.chnav ol { margin:0; padding-left:22px; columns:2; column-gap:28px; }
+.chnav li { margin:3px 0; break-inside:avoid; }
+@media (max-width:700px) { .chnav ol { columns:1; } }
+details.more { background:#f7f8fa; border:1px solid var(--line); border-radius:10px;
+  padding:6px 14px; margin:12px 0; }
+details.more > summary { cursor:pointer; font:600 14.5px system-ui, sans-serif; color:var(--accent); }
+details.more > summary::marker { color:var(--accent); }
+details.more[open] > summary { margin-bottom:8px; }
+.recap { background:#fff; border:1px solid var(--line); border-left:5px solid var(--green);
+  border-radius:12px; padding:12px 18px; margin:26px 0 12px;
+  font:15px/1.55 system-ui, sans-serif; }
+.recap .nx { margin:8px 0 0; padding-top:8px; border-top:1px dashed var(--line); font-size:14.5px; }
+/* прокручиваемые контейнеры делаем позиционированными: иначе скрытая
+   MathML-копия формулы (position:absolute) не обрезается ими и создаёт
+   горизонтальную прокрутку всей страницы на узком экране */
+main table, main .katex-display { position: relative; }
 </style>
 </head>
 <body>
@@ -44,7 +72,51 @@ main table { display: block; max-width: 100%; overflow-x: auto; }
   формулы до прямого моделирования. Это самая живая тема современной теории
   корабля — и уровень 1 двух главных режимов можно посчитать прямо здесь.</p>
 
-  <h2>Пять отказных режимов</h2>
+  <div class="tldr">
+    <div class="tt">Коротко</div>
+    <ul>
+      <li>Классические критерии оценивают ДСО на тихой воде и «не знают о
+      волне»; SGISC добавляет пять динамических отказных режимов, каждый со
+      своей физикой.</li>
+      <li>Для каждого режима построена воронка «уровень 1 → уровень 2 →
+      прямая оценка → эксплуатационные меры», и все пути объявлены регуляторно
+      эквивалентными.</li>
+      <li>Два главных режима зажимают проектанта с противоположных сторон:
+      малая \(GM\) ведёт к чистой потере остойчивости, большая — к
+      параметрической качке и чрезмерным ускорениям.</li>
+      <li>Руководство необязательно и применяется «на пробной основе»; оно само
+      перечисляет свои несогласованности.</li>
+      <li>Главные источники неопределённости — демпфирование бортовой качки,
+      статистика волнения и оценка вероятности редких событий.</li>
+      <li>Maersk Essen показала цену этих пробелов: расчёт с одной степенью
+      свободы даёт «прошёл» там, где шестистепенной даёт «не прошёл», а авария
+      произошла.</li>
+    </ul>
+    <div class="fl">
+      <div>\(GM_{\min} = KB + I_{TL}/\nabla - KG \geqslant 0{,}05\) м — уровень 1 чистой потери остойчивости;</div>
+      <div>\(\delta GM_1/GM \leqslant R_{PR}\) — уровень 1 параметрической качки, порог зависит от площади скуловых килей;</div>
+      <div>\(T_E \approx T_\theta/2\) — условие параметрического резонанса: \(GM\) «подкачивает» крен каждый второй цикл;</div>
+      <div>\(L \geqslant 200\) м или \(Fn \leqslant 0{,}3\) — неуязвимость к захвату волной и брочингу;</div>
+      <div>\(C \leqslant 0{,}06\) — типовой порог индекса уровня 2 по таблице повторяемости волнения.</div>
+    </div>
+  </div>
+
+  <div class="chnav">
+    <div class="up"><a href="theory">← Оглавление курса</a></div>
+    <div class="tt">В этой главе</div>
+    <ol>
+      <li><a href="#s1">Пять отказных режимов</a></li>
+      <li><a href="#s2">Живая проверка уровня 1</a></li>
+      <li><a href="#s3">Авария Maersk Essen</a></li>
+      <li><a href="#s4">Три уровня и пороги</a></li>
+      <li><a href="#s5">Статус документа</a></li>
+      <li><a href="#s6">Открытые проблемы</a></li>
+      <li><a href="#s7">Где это обсуждают</a></li>
+      <li><a href="#s8">Что читать по порядку</a></li>
+    </ol>
+  </div>
+
+  <h2 id="s1">Пять отказных режимов</h2>
 
   <div class="fm">
     <div class="fm-txt">
@@ -227,7 +299,7 @@ main table { display: block; max-width: 100%; overflow-x: auto; }
     </svg>
   </div>
 
-  <h2>Живая проверка уровня 1</h2>
+  <h2 id="s2">Живая проверка уровня 1</h2>
   <p>Формулы циркуляра, посчитанные честной гидростатикой нашего параметрического
   корпуса: «посадка на гребень» — это расчёт I<sub>x</sub> ватерлинии при
   уменьшенной эффективной осадке d<sub>L</sub> (волна λ = L, крутизна
@@ -261,7 +333,7 @@ main table { display: block; max-width: 100%; overflow-x: auto; }
     с учётом площади скуловых килей.</p>
   </div>
 
-  <h2>Авария, которая всё объясняет: Maersk Essen</h2>
+  <h2 id="s3">Авария, которая всё объясняет: Maersk Essen</h2>
   <p>16 января 2021 года контейнеровоз <b>Maersk Essen</b> в Тихом океане
   попал в параметрический резонанс и потерял ~750 контейнеров при кренах за
   30°. Дания и Всемирный совет судоходства прогнали случай через SGISC
@@ -274,7 +346,7 @@ main table { display: block; max-width: 100%; overflow-x: auto; }
   (высоком GM) — уходит в отказ по параметрической качке: два режима
   «зажимают» проектанта с двух сторон.</p>
 
-  <h2>Как устроены критерии: три уровня и операционные меры</h2>
+  <h2 id="s4">Как устроены критерии: три уровня и операционные меры</h2>
   <p>Циркуляр строит для каждого из пяти режимов «воронку»: сначала простая
   формула, затем упрощённая динамика, затем прямое моделирование. Логика
   такая: чем выше уровень, тем дороже расчёт и тем меньше в нём запаса
@@ -327,6 +399,7 @@ main table { display: block; max-width: 100%; overflow-x: auto; }
 
   <p>Пороговые значения уровней 1 и 2 (по тексту циркуляра) полезно видеть
   рядом — по ним понятно, насколько разнородны режимы:</p>
+  <details class="more"><summary>таблица целиком</summary>
   <table style="width:100%;border-collapse:collapse;font:14px system-ui;margin:12px 0">
     <thead><tr style="text-align:left">
       <th style="border-bottom:1px solid #d8d6cf;padding:6px 8px">Режим</th>
@@ -359,8 +432,10 @@ main table { display: block; max-width: 100%; overflow-x: auto; }
   боковое ускорение больше 9,81 м/с² в самой высокой точке пребывания людей;
   полный вероятностный вариант нормирует частоту отказа
   \(2{,}6\cdot 10^{-8}\) 1/с.</p>
+  </details>
 
-  <h2>Статус документа: что вышло после 2020 года</h2>
+  <h2 id="s5">Статус документа: что вышло после 2020 года</h2>
+  <details class="more"><summary>подробности и частные случаи</summary>
   <ul>
     <li><b>MSC.1/Circ.1652 — «Explanatory Notes to the Interim Guidelines on
     the Second Generation Intact Stability Criteria»</b> (циркуляр от
@@ -379,6 +454,7 @@ main table { display: block; max-width: 100%; overflow-x: auto; }
     руководства и передал часть вопросов в подкомитет по перевозке грузов и
     контейнеров.</li>
   </ul>
+  </details>
   <div class="note warn">Руководство <b>не является обязательным</b> и прямо
   предписано к применению «на пробной основе» (п. 1.1.4.2). Это не
   формальность: сам циркуляр в п. 1.1.4.1 перечисляет свои слабые места —
@@ -389,7 +465,7 @@ main table { display: block; max-width: 100%; overflow-x: auto; }
   малым надводным бортом»; достаточно обоснованными признаны только
   параметрическая качка и брочинг.</div>
 
-  <h2>Открытые проблемы области</h2>
+  <h2 id="s6">Открытые проблемы области</h2>
 
   <h3>1. Валидация прямых методов и редкие события</h3>
   <p>Прямая оценка — это моделирование движения судна на нерегулярном
@@ -469,7 +545,7 @@ main table { display: block; max-width: 100%; overflow-x: auto; }
   19,2° против 25° в критерии) и рассматривать режимы отказа <b>совместно</b>,
   а не по отдельности.</p>
 
-  <h2>Где это обсуждают</h2>
+  <h2 id="s7">Где это обсуждают</h2>
   <p>Профессиональное сообщество организовано вокруг двух серий: конференции
   <b>STAB</b> (ныне «Stability and Safety of Ships and Ocean Vehicles»,
   раз в три года) и семинаров <b>ISSW</b> (International Ship Stability
@@ -490,7 +566,8 @@ main table { display: block; max-width: 100%; overflow-x: auto; }
   переадресует на страницу ISSW 2026, но прямые ссылки на файлы трудов
   работают.</p>
 
-  <h2>Что читать по порядку</h2>
+  <h2 id="s8">Что читать по порядку</h2>
+  <details class="more"><summary>разбор по шагам</summary>
   <ol>
     <li><b>Учебник по статике и качке</b> — восстановить базу: ДСО, \(GM\),
     угол заката, собственный период качки, резонанс. Наши
@@ -522,8 +599,9 @@ main table { display: block; max-width: 100%; overflow-x: auto; }
     серия работ по методам оценки вероятности редких событий, секция по
     применению критериев на ISSW 2025.</li>
   </ol>
+  </details>
 
-  <h2>Источники этого раздела</h2>
+  <h2 id="s9">Источники этого раздела</h2>
   <p class="small">Ниже помечено, что проверено по первичному тексту, а что
   приведено по названию — как ориентир для поиска.</p>
   <ol class="bib">
@@ -617,6 +695,33 @@ main table { display: block; max-width: 100%; overflow-x: auto; }
   </ol>
   <p class="small">Классические учебники и нормативные документы по остальным
   разделам курса собраны на <a href="sources">странице источников</a>.</p>
+
+  <div class="recap">
+    <div class="tt">Что запомнить</div>
+    <ul>
+      <li>Остойчивость на волне не равна остойчивости на тихой воде: на гребне
+      ватерлиния сужается, \(I_x\) падает, и \(GM\) может уйти в ноль при
+      формально хорошей ДСО.</li>
+      <li>Пять режимов проверяются по отдельности, но в авариях они действуют
+      совместно — и требование смотреть на них вместе остаётся открытым.</li>
+      <li>Уровень 1 сознательно консервативен; провал на нём не приговор, а
+      повод считать дальше — вплоть до прямого моделирования.</li>
+      <li>Если расчёт не проходит, у судна остаются эксплуатационные
+      ограничения; для обесточенного судна — только район и сезон.</li>
+      <li>Численные пороги привязаны к конкретной статистике волнения, поэтому
+      при её пересмотре меняются и вердикты.</li>
+    </ul>
+    <div class="nx">Смежные главы: <a href="t-large">большие углы крена и ДСО</a>,
+      <a href="t-rolling">глава 6 «Качка»</a>,
+      <a href="stabilizers">успокоители качки</a>,
+      <a href="pitching">продольная качка</a>.
+      Посчитать руками: калькулятор SGISC выше,
+      <a href="solver">посадка и остойчивость</a>,
+      <a href="roll">качка на волнении</a>,
+      <a href="basin">опыты в бассейне</a>.</div>
+  </div>
+
+  <p><a href="stabilizers">← Успокоители качки</a> · <a href="theory">Оглавление</a> · <a href="sources">Источники →</a></p>
 </main>
 <script src="assets/geo.js"></script>
 <script src="assets/hydro.js"></script>

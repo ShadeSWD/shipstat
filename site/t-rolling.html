@@ -6,13 +6,83 @@
 <title>Глава 6. Качка</title>
 <meta name="description" content="Качка судна: свободные колебания и период, присоединённые массы, вынужденная качка и резонанс, диаграмма Ремеза, успокоители качки.">
 <link rel="stylesheet" href="assets/style.css">
+<style>
+/* слой быстрого чтения: «Коротко», навигация по главе, «Что запомнить» */
+.tldr { background:#fff; border:1px solid var(--line); border-left:5px solid var(--accent);
+  border-radius:12px; padding:12px 18px; margin:18px 0 14px;
+  font:15px/1.5 system-ui, sans-serif; }
+.tldr .tt, .recap .tt, .chnav .tt { font-weight:700; font-size:16px; margin-bottom:6px; }
+.tldr ul, .recap ul { margin:6px 0; padding-left:20px; }
+.tldr li, .recap li { margin:4px 0; }
+.tldr .fl { margin:8px 0 0; padding-top:8px; border-top:1px dashed var(--line); }
+.tldr .fl div { margin:5px 0; overflow-x:auto; }
+.chnav { background:#fbfbfc; border:1px solid var(--line); border-radius:12px;
+  padding:10px 18px; margin:0 0 20px; font:15px/1.5 system-ui, sans-serif; }
+.chnav .up { margin-bottom:6px; font-size:14px; }
+.chnav ol { margin:0; padding-left:22px; columns:2; column-gap:28px; }
+.chnav li { margin:3px 0; break-inside:avoid; }
+@media (max-width:700px) { .chnav ol { columns:1; } }
+details.more { background:#f7f8fa; border:1px solid var(--line); border-radius:10px;
+  padding:6px 14px; margin:12px 0; }
+details.more > summary { cursor:pointer; font:600 14.5px system-ui, sans-serif; color:var(--accent); }
+details.more > summary::marker { color:var(--accent); }
+details.more[open] > summary { margin-bottom:8px; }
+.recap { background:#fff; border:1px solid var(--line); border-left:5px solid var(--green);
+  border-radius:12px; padding:12px 18px; margin:26px 0 12px;
+  font:15px/1.55 system-ui, sans-serif; }
+.recap .nx { margin:8px 0 0; padding-top:8px; border-top:1px dashed var(--line); font-size:14.5px; }
+/* прокручиваемые контейнеры делаем позиционированными: иначе скрытая
+   MathML-копия формулы (position:absolute) не обрезается ими и создаёт
+   горизонтальную прокрутку всей страницы на узком экране */
+main table, main .katex-display { position: relative; }
+main .katex-display { overflow-x: auto; overflow-y: hidden; padding: 2px 0 6px; }
+main table { display: block; max-width: 100%; overflow-x: auto; }
+</style>
 </head>
 <body>
 <script src="assets/site.js" data-root="./" data-page="theory"></script>
 <main class="wrap">
   <h1>Глава 6. Качка</h1>
 
-  <h2>6.1. Свободные бортовые колебания</h2>
+  <div class="tldr">
+    <div class="tt">Коротко</div>
+    <ul>
+      <li>Остойчивость задаёт не амплитуду качки, а её период: чем больше \(h\),
+      тем короче период и резче качка. «Чем остойчивее, тем лучше» — неверно.</li>
+      <li>В инерцию колебаний входит присоединённый момент инерции воды
+      (плюс 20–30 %); без него период занижается.</li>
+      <li>Опасен резонанс: демпфирование бортовой качки мало, поэтому на
+      резонансе амплитуды вырастают в разы. Оперативный рычаг у судоводителя
+      один — курс и скорость, они меняют кажущуюся частоту волн.</li>
+      <li>Диаграмма качки (Ремеза) переводит это в практику: на плоскости
+      «скорость — курсовой угол» заштрихованы запретные сочетания.</li>
+      <li>Продольная качка жёстче бортовой (\(H \gg h\)): углы малы, но опасны
+      ускорения, слеминг и заливаемость.</li>
+      <li>Средства борьбы делятся на добавочное демпфирование (скуловые кили) и
+      противодействующий момент (цистерны, рули, гироскоп).</li>
+    </ul>
+    <div class="fl">
+      <div>\(T_\theta = 2\pi\sqrt{(J_x + \lambda_{44})/(D h)}\) — период свободных бортовых колебаний;</div>
+      <div>\(T_\theta \approx c\,B/\sqrt{h}\) — та же формула в «капитанском» виде, по размерениям и метацентрической высоте;</div>
+      <div>\(\omega_{\text{к}} = \omega - k\,v\cos\chi\) — кажущаяся частота: с какой частотой судно встречает волны;</div>
+      <div>\(0{,}7 &lt; T_{\text{к}}/T_\theta &lt; 1{,}3\) — полоса резонанса бортовой качки;</div>
+      <div>\(T_{\text{к}} \approx T_\theta/2\) — условие параметрического резонанса.</div>
+    </div>
+  </div>
+
+  <div class="chnav">
+    <div class="up"><a href="theory">← Оглавление курса</a></div>
+    <div class="tt">В этой главе</div>
+    <ol>
+      <li><a href="#s1">Свободные колебания и период</a></li>
+      <li><a href="#s2">Вынужденная качка и резонанс</a></li>
+      <li><a href="#s3">Диаграмма качки</a></li>
+      <li><a href="#s4">Килевая и вертикальная качка</a></li>
+      <li><a href="#s5">Успокоители качки</a></li>
+    </ol>
+  </div>
+
+  <h2 id="s1">6.1. Свободные бортовые колебания</h2>
   <p>Уравнение малых свободных колебаний: \((J_x + \lambda_{44})\cdot\ddot\theta + D\cdot h\cdot\theta = 0\), где
   Jₓ — момент инерции массы судна, λ₄₄ — <b>присоединённый момент инерции</b>
   воды (вода не успевает «отойти» и колеблется вместе с корпусом — добавка
@@ -25,7 +95,7 @@
   режим «excessive accelerations»). Остойчивость и плавность качки — вечный
   компромисс.</p>
 
-  <h2>6.2. Вынужденная качка и резонанс</h2>
+  <h2 id="s2">6.2. Вынужденная качка и резонанс</h2>
   <p>На волнении добавляются возмущающий момент и демпфирование:
   \((J_x + \lambda_{44})\ddot\theta + 2\nu\dot\theta + Dh\theta = M_0\cos(\omega_{\text{к}} t)\). Ключевая частота — <b>кажущаяся</b>:
   \(\omega_{\text{к}} = \omega - k\cdot v\cdot\cos(\text{курсовой угол})\): встречная волна «учащается», попутная
@@ -40,7 +110,8 @@
   из формул, в <a href="basin">опытовом бассейне</a> снимается с осциллограммы
   затухающих колебаний модели.</p>
 
-  <h2>6.3. Диаграмма качки (Ремеза) — по шагам</h2>
+  <h2 id="s3">6.3. Диаграмма качки (Ремеза) — по шагам</h2>
+  <details class="more"><summary>разбор по шагам</summary>
   <ol>
     <li>по волнограмме района — период волны T_w (или длина λ);</li>
     <li>считаем T_θ судна (по h текущей загрузки!);</li>
@@ -50,6 +121,7 @@
     (см. <a href="modern">SGISC</a>);</li>
     <li>выбирается курс/скорость вне штриховки.</li>
   </ol>
+  </details>
 
   <svg viewBox="0 0 640 250" class="geo-board" style="max-width:640px">
     <line x1="70" y1="210" x2="600" y2="210" stroke="#6b6b74" stroke-width="1.3"/>
@@ -68,7 +140,7 @@
     <text x="330" y="192" style="font:11px system-ui;fill:#1a7f37">безопасный выбор курса и скорости</text>
     <text x="70" y="244" style="font:11px system-ui;fill:#6b6b74">схема диаграммы качки: полосы — сочетания курс/скорость в резонансе (избегать)</text>
   </svg>
-  <h2>6.4. Килевая и вертикальная качка</h2>
+  <h2 id="s4">6.4. Килевая и вертикальная качка</h2>
   <p>Продольные колебания жёстче (\(H \gg h\)): восстанавливающий момент \(DH\psi\)
   в 50–150 раз больше кренящего при том же угле, поэтому амплитуды дифферента
   малы (3–6°), периоды коротки (\(T_\psi = 4\ldots8\) с), демпфирование велико, а
@@ -82,7 +154,7 @@
   слемингом и числовой пример — на отдельной странице
   <a href="pitching">«Продольная качка»</a>.</p>
 
-  <h2>6.5. Успокоители качки</h2>
+  <h2 id="s5">6.5. Успокоители качки</h2>
   <p>Резонансную качку гасят либо добавочным демпфированием (скуловые кили —
   дёшево, всегда работают, ценой 1–3 % сопротивления; их площадь входит и в
   пороги SGISC, см. \(R_{PR}\) в <a href="modern">калькуляторе</a>), либо
@@ -96,7 +168,27 @@
   <p>Об опасных нелинейных режимах (параметрический резонанс, брочинг,
   чистая потеря остойчивости) — страница
   <a href="modern">современных критериев</a> с работающим калькулятором.</p>
-  <p><a href="t-damage">← Глава 5</a> · <a href="theory">Оглавление</a></p>
+  <div class="recap">
+    <div class="tt">Что запомнить</div>
+    <ul>
+      <li>Период качки — паспортная характеристика загрузки: он считается по
+      \(h\) текущего состояния, и вместе с \(h\) меняется от рейса к рейсу.</li>
+      <li>Резонанс определяется не периодом волны, а кажущимся периодом; курс и
+      скорость — единственное, чем судоводитель управляет в шторм.</li>
+      <li>Демпфирование бортовой качки мало, поэтому качку гасят специально:
+      кили дают его всегда, цистерны, рули и гироскоп — противодействующий момент.</li>
+      <li>Избыточная остойчивость оборачивается ускорениями и повреждениями
+      груза, недостаточная — большими углами; проектный выбор \(h\) всегда компромисс.</li>
+    </ul>
+    <div class="nx">Смежные главы: <a href="pitching">продольная качка</a>,
+      <a href="stabilizers">успокоители качки</a>,
+      <a href="modern">современные критерии остойчивости</a>.
+      Посчитать руками: <a href="roll">качка на волнении</a>,
+      <a href="solver">посадка и остойчивость</a>,
+      <a href="basin">опыты в бассейне</a>.</div>
+  </div>
+
+  <p><a href="t-damage">← Глава 5</a> · <a href="theory">Оглавление</a> · <a href="pitching">Продольная качка →</a></p>
 </main>
 </body>
 </html>
