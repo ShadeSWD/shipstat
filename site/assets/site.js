@@ -16,6 +16,8 @@
     { href: 'solver', key: 'solver', title: 'Посадка и остойчивость' },
     { href: 'theory', key: 'theory', title: 'Теория' },
     { href: 'roll', key: 'roll', title: 'Качка' },
+    { href: 'pitching', key: 'pitching', title: 'Продольная качка' },
+    { href: 'stabilizers', key: 'stabilizers', title: 'Успокоители' },
     { href: 'basin', key: 'basin', title: 'Бассейн' },
     { href: 'modern', key: 'modern', title: 'Современные критерии' },
     { href: 'sources', key: 'sources', title: 'Источники' },

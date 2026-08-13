@@ -59,6 +59,11 @@ h3 { font-size: 18px; margin: 22px 0 6px; }
 .tip { background: #eef3ff; border-color: #c9d6f2; }
 .warn { background: #fdeeee; border-color: #eec6c2; }
 
+/* выключные формулы KaTeX: на узком экране прокручиваются внутри себя,
+   а не распирают страницу */
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+.katex-display > .katex { white-space: nowrap; }
+
 /* карточки */
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; margin: 18px 0; }
 .card {
@@ -186,6 +191,10 @@ footer.site .wrap { display: flex; flex-wrap: wrap; gap: 10px 30px; justify-cont
 @media (max-width: 720px) {
   h1 { font-size: 24px; }
   .boards > div { flex-basis: 100%; }
+  /* меню из девяти пунктов на телефоне занимает пять строк — не липнем к
+     верху, иначе съедаем пятую часть экрана */
+  header.site { position: static; }
+  nav.top { font-size: 14px; gap: 2px 12px; }
 }
 .dim { opacity: .32; }
 

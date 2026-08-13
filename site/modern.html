@@ -27,6 +27,9 @@ svg.fm-fig text, #sg-fig text { font: 11px system-ui, sans-serif; fill: #16161a;
 .sk-dsh { stroke-dasharray: 6 5; } .sk-w1 { stroke-width: 1; } .sk-w25 { stroke-width: 2.5; }
 #sg-fig { width: 100%; max-width: 640px; height: auto; display: block; background: #fff;
   border: 1px solid var(--line); border-radius: 10px; margin: 12px 0 0; }
+main .katex-display { overflow-x: auto; overflow-y: hidden; padding: 2px 0 6px; }
+main .katex-mathml { position: absolute; clip: rect(1px,1px,1px,1px); width: 1px; height: 1px; overflow: hidden; }
+main table { display: block; max-width: 100%; overflow-x: auto; }
 </style>
 </head>
 <body>
@@ -270,36 +273,349 @@ svg.fm-fig text, #sg-fig text { font: 11px system-ui, sans-serif; fill: #16161a;
   (высоком GM) — уходит в отказ по параметрической качке: два режима
   «зажимают» проектанта с двух сторон.</p>
 
-  <h2>Открытые проблемы области (что читать)</h2>
-  <ol class="bib">
-    <li>Denmark, WSC. Experiences gained on the use of the Interim guidelines
-      (MSC.1/Circ.1627): calculations for MV Maersk Essen container loss
-      accident. IMO SDC 10/16, 2023. —
-      <span class="bib-url"><a href="https://www.worldshipping.org/s/SDC-10-16-Experiences-gained-on-the-use-of-the-Interim-guidelines-on-the-second-generation-intact-st.pdf">PDF</a></span></li>
-    <li>Shin D. [et al.] Evaluation of Parametric Roll Mode Applying the IMO
-      SGISC for 13K Chemical Tanker // J. Mar. Sci. Eng. 2023. 11(7):1462. —
-      судно проваливает уровни 1 и 2A, но проходит 2B: иерархия
-      консервативности нарушается —
-      <span class="bib-url"><a href="https://doi.org/10.3390/jmse11071462">DOI</a></span></li>
-    <li>Shin D., Moon B. Design Analysis Using Evaluation of Surf-Riding and
-      Broaching by the IMO SGISC for a Small Fishing Boat // JMSE. 2024.
-      12(11):2066 — для малых судов методика не устоялась —
-      <span class="bib-url"><a href="https://doi.org/10.3390/jmse12112066">DOI</a></span></li>
-    <li>Petacco N. [et al.] An insight about roll damping within the SGISC //
-      J. Ocean Eng. Mar. Energy. 2024. 10(4) — демпфирование качки — главная
-      неопределённость уровня 2 —
-      <span class="bib-url"><a href="https://doi.org/10.1007/s40722-024-00347-9">DOI</a></span></li>
-    <li>Luthy V. [et al.] Statistical approach of the most effective manoeuvre…
-      // Proc. ISSW 2023. P. 95–104 — параметрический резонанс операционно
-      почти не избегается —
-      <span class="bib-url"><a href="https://www.shipstab.org/files/Proceedings/ISSW/ISSW_2023_Istanbul_Turkey/ISSW2023_Proceedings-25.09.2023.pdf">труды ISSW 2023 (PDF)</a></span></li>
-    <li>Maki A. [et al.] Review of the analytical prediction method of
-      surf-riding threshold… // arXiv:2406.12853 —
-      <span class="bib-url"><a href="https://arxiv.org/abs/2406.12853">arXiv</a></span></li>
+  <h2>Как устроены критерии: три уровня и операционные меры</h2>
+  <p>Циркуляр строит для каждого из пяти режимов «воронку»: сначала простая
+  формула, затем упрощённая динамика, затем прямое моделирование. Логика
+  такая: чем выше уровень, тем дороже расчёт и тем меньше в нём запаса
+  «на незнание». Важная деталь, которую часто упускают: в самом циркуляре
+  (пп. 1.1.1.3 и 1.1.3.1) все пути объявлены <b>регуляторно
+  эквивалентными</b> — можно сразу начинать с прямой оценки, минуя уровни.</p>
+
+  <svg class="fm-fig" viewBox="0 0 640 290" style="max-width:640px;flex-basis:100%" role="img" aria-label="Схема трёхуровневой оценки SGISC: уровень 1, уровень 2, прямая оценка и эксплуатационные меры">
+    <rect x="30" y="28" width="530" height="26" rx="8" fill="rgba(26,127,55,.12)" stroke="#1a7f37" stroke-width="1.4"/>
+    <text class="fg-grn fg-b" x="295" y="45" text-anchor="middle">судно признано неуязвимым к данному режиму отказа</text>
+    <g fill="#fff" stroke="#16161a" stroke-width="1.6">
+      <rect x="30" y="96" width="150" height="58" rx="10"/>
+      <rect x="210" y="96" width="150" height="58" rx="10"/>
+      <rect x="390" y="96" width="170" height="58" rx="10"/>
+    </g>
+    <text class="fg-b" x="105" y="118" text-anchor="middle">Уровень 1</text>
+    <text class="fg-mut" x="105" y="133" text-anchor="middle">простая формула,</text>
+    <text class="fg-mut" x="105" y="147" text-anchor="middle">заведомо консервативно</text>
+    <text class="fg-b" x="285" y="118" text-anchor="middle">Уровень 2</text>
+    <text class="fg-mut" x="285" y="133" text-anchor="middle">упрощённая динамика</text>
+    <text class="fg-mut" x="285" y="147" text-anchor="middle">+ статистика волнения</text>
+    <text class="fg-b" x="475" y="118" text-anchor="middle">Прямая оценка (DSA)</text>
+    <text class="fg-mut" x="475" y="133" text-anchor="middle">моделирование во времени,</text>
+    <text class="fg-mut" x="475" y="147" text-anchor="middle">валидированный код</text>
+    <g class="sk-g" stroke-width="1.6">
+      <path marker-end="url(#aG)" d="M105,96 L105,60"/>
+      <path marker-end="url(#aG)" d="M285,96 L285,60"/>
+      <path marker-end="url(#aG)" d="M475,96 L475,60"/>
+    </g>
+    <g class="sk-r" stroke-width="1.6">
+      <path marker-end="url(#aR)" d="M180,125 L206,125"/>
+      <path marker-end="url(#aR)" d="M360,125 L386,125"/>
+      <path marker-end="url(#aR)" d="M475,154 L475,186"/>
+    </g>
+    <text class="fg-red" x="193" y="88" text-anchor="middle">не прошёл</text>
+    <text class="fg-red" x="373" y="88" text-anchor="middle">не прошёл</text>
+    <text class="fg-red" x="536" y="172" text-anchor="middle">не прошёл</text>
+    <rect x="330" y="188" width="280" height="56" rx="10" fill="#fff" stroke="#16161a" stroke-width="1.6"/>
+    <text class="fg-b" x="470" y="208" text-anchor="middle">Эксплуатационные меры</text>
+    <text class="fg-mut" x="470" y="223" text-anchor="middle">ограничения по району, сезону и H_s;</text>
+    <text class="fg-mut" x="470" y="237" text-anchor="middle">руководство «скорость — курс к волне»</text>
+    <rect x="30" y="188" width="270" height="56" rx="10" fill="#fff" stroke="#16161a" stroke-width="1.6"/>
+    <text class="fg-b" x="165" y="208" text-anchor="middle">Изменение проекта</text>
+    <text class="fg-mut" x="165" y="223" text-anchor="middle">или отказ от данного состояния</text>
+    <text class="fg-mut" x="165" y="237" text-anchor="middle">загрузки как неприемлемого</text>
+    <path class="sk-r sk-w1" marker-end="url(#aR)" d="M330,216 L306,216"/>
+    <text class="fg-mut" x="320" y="266" text-anchor="middle">все четыре пути объявлены регуляторно эквивалентными —</text>
+    <text class="fg-mut" x="320" y="281" text-anchor="middle">начинать разрешено с любого, в том числе сразу с прямой оценки</text>
+  </svg>
+
+  <p>Пороговые значения уровней 1 и 2 (по тексту циркуляра) полезно видеть
+  рядом — по ним понятно, насколько разнородны режимы:</p>
+  <table style="width:100%;border-collapse:collapse;font:14px system-ui;margin:12px 0">
+    <thead><tr style="text-align:left">
+      <th style="border-bottom:1px solid #d8d6cf;padding:6px 8px">Режим</th>
+      <th style="border-bottom:1px solid #d8d6cf;padding:6px 8px">Уровень 1</th>
+      <th style="border-bottom:1px solid #d8d6cf;padding:6px 8px">Уровень 2</th>
+    </tr></thead>
+    <tbody>
+      <tr><td style="border-bottom:1px solid #eee;padding:6px 8px">Обесточенное судно</td>
+        <td style="border-bottom:1px solid #eee;padding:6px 8px">схема погодного критерия: \(\varphi_0 \leqslant 16^\circ\) (или 0,8 угла входа палубы), площадь b ≥ a; P = 504 Па; \(\varphi_2=\min(\varphi_f, 50^\circ, \varphi_c)\)</td>
+        <td style="border-bottom:1px solid #eee;padding:6px 8px">суммарный индекс \(C \leqslant 0{,}06\) по клеткам таблицы волнения</td></tr>
+      <tr><td style="border-bottom:1px solid #eee;padding:6px 8px">Чрезмерные ускорения</td>
+        <td style="border-bottom:1px solid #eee;padding:6px 8px">боковое ускорение ≤ 4,64 м/с² (с коэффициентом \(k_L\), учитывающим совместно качку бортовую, килевую и рыскание)</td>
+        <td style="border-bottom:1px solid #eee;padding:6px 8px">\(C \leqslant 0{,}00039\)</td></tr>
+      <tr><td style="border-bottom:1px solid #eee;padding:6px 8px">Чистая потеря остойчивости</td>
+        <td style="border-bottom:1px solid #eee;padding:6px 8px">\(GM_{\min} \geqslant 0{,}05\) м</td>
+        <td style="border-bottom:1px solid #eee;padding:6px 8px">\(C \leqslant 0{,}06\); отказом считается закат \(&lt;30^\circ\) либо крен \(&gt;15^\circ\) (пассажирские) / \(25^\circ\) под плечом \(l = 8(H/\lambda)dFn^2\)</td></tr>
+      <tr><td style="border-bottom:1px solid #eee;padding:6px 8px">Параметрическая качка</td>
+        <td style="border-bottom:1px solid #eee;padding:6px 8px">\(\delta GM_1/GM \leqslant R_{PR}\) (порог зависит от площади скуловых килей и \(C_m\); для острой скулы 1,87)</td>
+        <td style="border-bottom:1px solid #eee;padding:6px 8px">\(C_1 \leqslant 0{,}06\) или \(C_2 \leqslant 0{,}025\); в \(C_2\) отказ — крен больше 25° в расчёте во временной области</td></tr>
+      <tr><td style="border-bottom:1px solid #eee;padding:6px 8px">Захват волной и брочинг</td>
+        <td style="border-bottom:1px solid #eee;padding:6px 8px">неуязвимо, если \(L \geqslant 200\) м <b>или</b> \(Fn \leqslant 0{,}3\)</td>
+        <td style="border-bottom:1px solid #eee;padding:6px 8px">\(C \leqslant 0{,}005\) (самый жёсткий порог из пяти)</td></tr>
+    </tbody>
+  </table>
+  <p class="small">Общие параметры для уровня 2: спектр Бретшнайдера и таблица
+  повторяемости волнения на 100 000 наблюдений (Северная Атлантика, по
+  рекомендации МАКО № 34 в редакции 2001 г.); активные успокоители качки при
+  оценке выключаются. В прямой оценке отказом считается крен больше
+  \(\min(40^\circ,\ \text{закат},\ \text{угол погружения отверстий})\) или
+  боковое ускорение больше 9,81 м/с² в самой высокой точке пребывания людей;
+  полный вероятностный вариант нормирует частоту отказа
+  \(2{,}6\cdot 10^{-8}\) 1/с.</p>
+
+  <h2>Статус документа: что вышло после 2020 года</h2>
+  <ul>
+    <li><b>MSC.1/Circ.1652 — «Explanatory Notes to the Interim Guidelines on
+    the Second Generation Intact Stability Criteria»</b> (циркуляр от
+    26 апреля 2023 г.; одобрены на MSC 105 в апреле 2022 г., подготовлены
+    SDC 8). Это почти 300 страниц: физика каждого режима, числовые примеры,
+    теоретическая база прямой оценки, методы экстраполяции редких событий,
+    демпфирование качки. Именно здесь, а не в самом циркуляре 1627, впервые
+    появляется <i>упрощённый метод Икеды</i> для демпфирования — с жёстко
+    очерченными границами применимости по \(C_B\), \(B/d\), \(OG/d\),
+    \(C_m\) и размерам скуловых килей.</li>
+    <li><b>SDC 10 (2023), документ SDC 10/16</b> — расчёты по аварии
+    Maersk Essen, поданные Данией и Всемирным советом судоходства.</li>
+    <li><b>SDC 11 (январь 2025)</b> — тема формально закрыта выпуском 1627 и
+    1652, но подкомитет согласился <b>пригласить государства и организации
+    подать предложение о новом выходе (new output) для пересмотра</b>
+    руководства и передал часть вопросов в подкомитет по перевозке грузов и
+    контейнеров.</li>
+  </ul>
+  <div class="note warn">Руководство <b>не является обязательным</b> и прямо
+  предписано к применению «на пробной основе» (п. 1.1.4.2). Это не
+  формальность: сам циркуляр в п. 1.1.4.1 перечисляет свои слабые места —
+  для обесточенного судна уровни 1 и 2 иногда дают несогласованные
+  результаты (уровень 2 бывает консервативнее уровня 1); критерии чрезмерных
+  ускорений «могут потребовать дальнейшего уточнения»; уровень 2 чистой
+  потери остойчивости «даёт очень консервативные результаты для судов с
+  малым надводным бортом»; достаточно обоснованными признаны только
+  параметрическая качка и брочинг.</div>
+
+  <h2>Открытые проблемы области</h2>
+
+  <h3>1. Валидация прямых методов и редкие события</h3>
+  <p>Прямая оценка — это моделирование движения судна на нерегулярном
+  волнении с валидированным кодом. Две трудности здесь принципиальны.
+  Первая — <b>валидация</b>: циркуляр требует двухфазной проверки
+  (качественной и количественной) против модельных испытаний, а модельный
+  эксперимент остаётся эталоном именно потому, что вязкие эффекты
+  демпфирования плохо считаются. Вторая — <b>редкость события</b>:
+  опрокидывание с частотой \(10^{-8}\) 1/с прямым счётом не поймать,
+  нужны методы экстраполяции. Циркуляр допускает экстраполяцию по высоте
+  волны (аппроксимация вида \(\ln T = A + B/H_s^2\)) и прямо называет
+  альтернативы — <i>envelope peaks over threshold</i>, <i>split-time</i>
+  (метод возмущения движения), <i>метод критической волны</i>. Причём саму
+  процедуру экстраполяции тоже требуется валидировать — на полусотне
+  статистически независимых наборов данных. Это делает прямую оценку
+  дорогой и пока доступной единицам организаций.</p>
+
+  <h3>2. Какую статистику волнения считать «правильной»</h3>
+  <p>Самая горячая тема последних лет. Пороговые значения уровней 1 и 2
+  калибровались под конкретную таблицу повторяемости волнения — рекомендацию
+  МАКО № 34 в редакции 2001 г. (Северная Атлантика, спектр Бретшнайдера,
+  средний период пересечения нуля). В 2022 году МАКО выпустила ревизию, где
+  изменились и таблица, и спектр (JONSWAP с \(\gamma = 1{,}5\)), и
+  используемый период. Работы, представленные на семинарах 2025 года,
+  показывают: вердикты «прошёл / не прошёл» для контейнеровозов при этом
+  <b>меняются</b>, а значит пороги \(R\) нужно перекалибровывать. Рядом —
+  вторая претензия, поданная по итогам разбора Maersk Essen: североатлантическая
+  статистика нерепрезентативна для тихоокеанской зыби с периодами 15–18 с,
+  и на трансокеанских линиях она не консервативна.</p>
+
+  <h3>3. Ветер, рыскание и то, что происходит с управлением</h3>
+  <p>Ветер входит в критерии только через режим обесточенного судна
+  (статический момент плюс порыв, расчётное давление 504 Па) — а в реальных
+  авариях ветер действует одновременно с другими режимами. Рыскание учтено
+  жёстче: для чистой потери остойчивости и брочинга прямая оценка требует
+  минимум четырёх степеней свободы <b>с рысканием</b> и модели авторулевого,
+  потому что именно потеря управляемости на склоне волны переводит захват
+  волной в брочинг. Аналитические пороги захвата волной продолжают
+  уточняться — в том числе вопрос о единственности приближённого решения,
+  на котором построен уровень 2.</p>
+
+  <h3>4. Демпфирование бортовой качки — главный источник неопределённости</h3>
+  <p>Всё, что связано с амплитудой качки, упирается в демпфирование, а оно
+  вязкое, нелинейное и плохо масштабируется. Пояснительные записки честно
+  говорят, что наиболее надёжный источник — модельный эксперимент, а
+  вычислительная гидродинамика пока «перспектива». Упрощённый метод Икеды —
+  регрессия, и вне её границ применимости (по полноте, отношению ширины к
+  осадке, положению центра тяжести, размерам скуловых килей) результат не
+  гарантирован. Отдельная живая тема — <b>масштабный эффект</b>: вязкое
+  демпфирование модели и натурного судна различаются, и переносить
+  результаты «по Фруду» строго нельзя.</p>
+
+  <h3>5. Эксплуатационные меры: что реально делать на мостике</h3>
+  <p>Если судно не проходит расчёт, разрешено ограничить эксплуатацию:
+  районом и сезоном, предельной высотой волны либо запретными сочетаниями
+  «скорость — курс относительно волн». Для обесточенного судна доступны
+  <i>только</i> ограничения по району и сезону — судно без хода не может ни
+  маневрировать, ни уклоняться от погоды. Проблема практическая: чтобы
+  пользоваться руководством «скорость — курс», на борту нужен детальный
+  прогноз <b>спектра</b> волнения и ветра, а не просто высота волны.
+  Отсюда две ветви исследований — упрощённые руководства, пригодные для
+  вахтенного помощника, и встраивание критериев прямо в системы
+  маршрутизации по погоде. Отдельно отмечается пробел: полноценных
+  эксплуатационных мер для чистой потери остойчивости до сих пор не
+  хватает.</p>
+
+  <h3>6. Согласованность уровней</h3>
+  <p>Иерархия «уровень 1 консервативнее уровня 2, уровень 2 консервативнее
+  прямой оценки» — не теорема, а пожелание, и оно нарушается. Циркуляр сам
+  признаёт это для обесточенного судна; независимые работы фиксируют случаи,
+  когда судно проваливает уровень 1 и 2A, но проходит 2B. Самый громкий
+  пример — Maersk Essen: расчёт с одной степенью свободы даёт «прошёл» там,
+  где шестистепенной нелинейный код даёт «не прошёл», причём авария реально
+  произошла. Отсюда предложения: требовать минимум шесть степеней свободы,
+  увязать пороговый угол крена для контейнеровозов с прочностью креплений
+  груза (у Maersk Essen допустимый по грузовому плану крен составлял
+  19,2° против 25° в критерии) и рассматривать режимы отказа <b>совместно</b>,
+  а не по отдельности.</p>
+
+  <h2>Где это обсуждают</h2>
+  <p>Профессиональное сообщество организовано вокруг двух серий: конференции
+  <b>STAB</b> (ныне «Stability and Safety of Ships and Ocean Vehicles»,
+  раз в три года) и семинаров <b>ISSW</b> (International Ship Stability
+  Workshop) в промежуточные годы; их курирует постоянный комитет STAB.
+  Труды всех выпусков выкладываются открыто, там же собирается база данных
+  для валидации расчётных кодов.</p>
+  <ul>
+    <li>STAB&amp;S 2021 — первая конференция обновлённой серии, Университет
+    Стратклайда, онлайн;</li>
+    <li>ISSW 2022 — Гданьск; ISSW 2023 — Стамбул;</li>
+    <li>STAB&amp;S 2024 — Уси (Китай);</li>
+    <li><b>ISSW 2025 — Ханья, Крит</b>, с отдельной секцией «Опыт применения
+    критериев второго поколения и возможные изменения нормативов»;</li>
+    <li><b>ISSW 2026 — Ферроль, Испания, 13–16 сентября 2026</b>.</li>
+  </ul>
+  <p class="small">Сайт сообщества <a href="https://shipstab.org/">shipstab.org</a>
+  на момент подготовки страницы находится на обслуживании: главная
+  переадресует на страницу ISSW 2026, но прямые ссылки на файлы трудов
+  работают.</p>
+
+  <h2>Что читать по порядку</h2>
+  <ol>
+    <li><b>Учебник по статике и качке</b> — восстановить базу: ДСО, \(GM\),
+    угол заката, собственный период качки, резонанс. Наши
+    <a href="theory">главы 2–4</a> и <a href="t-rolling">глава 6</a> написаны
+    как раз под это.</li>
+    <li><b>Кодекс ОСНС 2008</b> (резолюция MSC.267(85)), часть A — обязательные
+    критерии и погодный критерий; к нему <b>MSC.1/Circ.1281</b> —
+    пояснительные записки. Здесь важно понять, чего эти критерии
+    принципиально <i>не</i> видят: они не знают о волне.</li>
+    <li><b>MSC.1/Circ.1228</b> — действующие рекомендации капитану по
+    избежанию опасных ситуаций на волнении. Это «предок» эксплуатационных
+    руководств SGISC, написанный человеческим языком.</li>
+    <li><b>Обзорная глава от разработчиков</b> — Umeda N., Francescutto A.
+    «The Second Generation Intact Stability Criteria: Achievements and
+    Remaining Issues», в сборнике <i>Contemporary Ideas on Ship Stability</i>
+    (Springer). Компактный вход в предмет.</li>
+    <li><b>MSC.1/Circ.1627</b> — сам циркуляр, в порядке: пп. 1.1.1–1.1.4
+    (логика и самокритика) → один режим целиком (удобнее всего
+    параметрическая качка) → п. 2.7 (спектр и таблица волнения) → гл. 3
+    (прямая оценка) → гл. 4 (эксплуатационные меры).</li>
+    <li><b>MSC.1/Circ.1652</b> — параллельно к каждой части: приложение 1
+    (физика режимов — лучший источник иллюстраций), приложение 2 (числовые
+    примеры), приложение 3 (демпфирование, упрощённый метод Икеды),
+    приложение 4 (экстраполяция редких событий и валидация).</li>
+    <li><b>SDC 10/16</b> — разбор аварии Maersk Essen: короткий документ, в
+    котором видно, где методика даёт сбой; и сводка итогов <b>SDC 11</b> о
+    статусе пересмотра.</li>
+    <li><b>Периодика и труды семинаров</b> — обзоры по прямой оценке,
+    серия работ по методам оценки вероятности редких событий, секция по
+    применению критериев на ISSW 2025.</li>
   </ol>
-  <p class="small">Сообщество и труды конференций STAB&S/ISSW — открыто на
-  <a href="http://www.shipstab.org/">shipstab.org</a>; следующая ISSW —
-  2026, Ферроль.</p>
+
+  <h2>Источники этого раздела</h2>
+  <p class="small">Ниже помечено, что проверено по первичному тексту, а что
+  приведено по названию — как ориентир для поиска.</p>
+  <ol class="bib">
+    <li><b>[проверено по официальному тексту]</b> Interim Guidelines on the
+      Second Generation Intact Stability Criteria : MSC.1/Circ.1627. — IMO,
+      10.12.2020. — Все числа таблицы уровней 1–2, требования к прямой оценке
+      и эксплуатационным мерам, а также самокритика п. 1.1.4.1 взяты из
+      текста циркуляра. —
+      <span class="bib-url"><a href="https://www.imorules.com/MSCCIRC_1627.html">карточка и оглавление</a></span></li>
+    <li><b>[проверено по официальному тексту]</b> Explanatory Notes to the
+      Interim Guidelines on the Second Generation Intact Stability Criteria :
+      MSC.1/Circ.1652. — IMO, 26.04.2023 (одобрены MSC 105, апрель 2022;
+      подготовлены SDC 8). — Приложения 1–6: физика режимов, примеры,
+      демпфирование (упрощённый метод Икеды и его границы), методы
+      экстраполяции.</li>
+    <li><b>[проверено]</b> Denmark, World Shipping Council. Experiences gained
+      on the use of the Interim guidelines (MSC.1/Circ.1627): calculations for
+      MV Maersk Essen container loss accident : IMO SDC 10/16, 2023. —
+      <span class="bib-url"><a href="https://www.worldshipping.org/s/SDC-10-16-Experiences-gained-on-the-use-of-the-Interim-guidelines-on-the-second-generation-intact-st.pdf">PDF</a></span></li>
+    <li><b>[проверено]</b> Итоги SDC 11 (январь 2025): приглашение подать
+      предложение о новом выходе для пересмотра руководства — по сводкам
+      признанных организаций.</li>
+    <li><b>[проверено, ссылки живые]</b> Труды семинаров ISSW:
+      <span class="bib-url"><a href="https://shipstab.org/files/Proceedings/ISSW/ISSW_2025_Chania_Crete_Greece/ISSW%202025%20Proceedings.pdf">ISSW 2025, Ханья</a> ·
+      <a href="https://shipstab.org/files/Proceedings/ISSW/ISSW_2023_Istanbul_Turkey/ISSW2023_Proceedings-25.09.2023.pdf">ISSW 2023, Стамбул</a></span>;
+      сайт сообщества <a href="https://shipstab.org/">shipstab.org</a>,
+      ISSW 2026 — <a href="https://www.issw2026ferrol.com/">Ферроль</a>.</li>
+    <li><b>[DOI проверен]</b> Petacco N., Pollicardo A., Gualeni P. An insight
+      about roll damping within the second generation intact stability
+      criteria // J. Ocean Eng. Mar. Energy. 2024. Vol. 10, № 4. —
+      <span class="bib-url"><a href="https://doi.org/10.1007/s40722-024-00347-9">DOI</a></span></li>
+    <li><b>[DOI проверен]</b> Shigunov V. Intact stability operational
+      measures: criteria, standards and examples // Ocean Engineering. 2023.
+      Vol. 279, art. 114446. —
+      <span class="bib-url"><a href="https://doi.org/10.1016/j.oceaneng.2023.114446">DOI</a></span></li>
+    <li><b>[DOI проверен]</b> Bulian G., Francescutto A. Level 1 vulnerability
+      criterion for the dead ship condition: a practical methodology for
+      embedding operational limitations // Ocean Engineering. 2023. Vol. 272,
+      art. 113868. —
+      <span class="bib-url"><a href="https://doi.org/10.1016/j.oceaneng.2023.113868">DOI</a></span></li>
+    <li><b>[DOI проверен]</b> Bulian G., Orlandi A. Effect of environmental
+      data uncertainty in the framework of second generation intact stability
+      criteria // Ocean Engineering. 2022. Vol. 253, art. 111253. —
+      <span class="bib-url"><a href="https://doi.org/10.1016/j.oceaneng.2022.111253">DOI</a></span></li>
+    <li><b>[DOI проверен]</b> Hashimoto H., Furusho K. Influence of sea areas
+      and season in navigation on the ship vulnerability to the parametric
+      rolling failure mode // Ocean Engineering. 2022. Vol. 266, art. 112714. —
+      <span class="bib-url"><a href="https://doi.org/10.1016/j.oceaneng.2022.112714">DOI</a></span></li>
+    <li><b>[DOI проверен]</b> Mangalathu Raj S., Enshaei H., Abdussamie N.
+      Standard wave scatter table limitation for evaluating SGISC based on
+      hindcast data analysis // Applied Sciences. 2023. Vol. 13, № 2, art. 1181. —
+      <span class="bib-url"><a href="https://doi.org/10.3390/app13021181">DOI</a></span></li>
+    <li><b>[DOI проверен]</b> Belenky V., Weems K., Lin W.-M., Pipiras V.,
+      Sapsis T. Estimation of probability of capsizing with split-time
+      method // Ocean Engineering. 2024. Art. 116452. —
+      <span class="bib-url"><a href="https://doi.org/10.1016/j.oceaneng.2023.116452">DOI</a></span>;
+      Campbell B. [et al.] Estimation of probability of large roll angle with
+      envelope peaks over threshold method. Art. 116296. —
+      <span class="bib-url"><a href="https://doi.org/10.1016/j.oceaneng.2023.116296">DOI</a></span>;
+      Wandji C. [et al.] Benchmarking of direct counting approaches.
+      Art. 116649. —
+      <span class="bib-url"><a href="https://doi.org/10.1016/j.oceaneng.2023.116649">DOI</a></span></li>
+    <li><b>[DOI проверен]</b> Petacco N., Petkovic G., Gualeni P. An insight
+      on the post-processing procedure of the direct stability assessment
+      within SGISC // Ocean Engineering. 2024. Vol. 305, art. 117982. —
+      <span class="bib-url"><a href="https://doi.org/10.1016/j.oceaneng.2024.117982">DOI</a></span></li>
+    <li><b>[DOI проверен]</b> Zeng K., Lu J., Gu M., Yang C. A comparative
+      analysis of CFD and the potential flow method for the pure loss of
+      stability in following waves // J. Mar. Sci. Eng. 2023. Vol. 11, № 11,
+      art. 2135. —
+      <span class="bib-url"><a href="https://doi.org/10.3390/jmse11112135">DOI</a></span></li>
+    <li><b>[DOI проверен]</b> Shin D. [et al.] Evaluation of parametric roll
+      mode applying the IMO SGISC for 13K chemical tanker // J. Mar. Sci. Eng.
+      2023. Vol. 11, № 7, art. 1462. —
+      <span class="bib-url"><a href="https://doi.org/10.3390/jmse11071462">DOI</a></span>;
+      Shin D., Moon B. Design analysis using evaluation of surf-riding and
+      broaching by the IMO SGISC for a small fishing boat // J. Mar. Sci. Eng.
+      2024. Vol. 12, № 11, art. 2066. —
+      <span class="bib-url"><a href="https://doi.org/10.3390/jmse12112066">DOI</a></span></li>
+    <li><b>[приведено по названию]</b> Spyrou K. J., Belenky V. L.,
+      Katayama T., Bačkalov I., Francescutto A. (eds.) Contemporary Ideas on
+      Ship Stability. — Springer. — В сборнике главы об истории и остающихся
+      вопросах SGISC, о согласованности критериев и о валидации расчётных
+      методов. —
+      <span class="bib-url"><a href="https://doi.org/10.1007/978-3-031-16329-6">DOI сборника</a></span></li>
+    <li><b>[приведено по названию]</b> Работы 2025–2026 гг. о влиянии новой
+      редакции рекомендации МАКО № 34 на пороги уровней 1 и 2, об упрощённых
+      эксплуатационных руководствах и о самоповторе при восстановлении
+      нерегулярного волнения — в трудах ISSW 2025 и в журнале
+      Ocean Engineering.</li>
+  </ol>
+  <p class="small">Классические учебники и нормативные документы по остальным
+  разделам курса собраны на <a href="sources">странице источников</a>.</p>
 </main>
 <script src="assets/site.js" data-root="./" data-page="modern"></script>
 <script src="assets/geo.js"></script>

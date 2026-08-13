@@ -17,6 +17,9 @@ table.el th { color:#3a3a42; font-weight:600; }
 .srcbox { background:#f7f8fa; border:1px solid var(--line); border-radius:12px; padding:12px 16px; margin:22px 0 8px; font-size:15px; }
 .srcbox h2 { margin-top:4px; font-size:19px; }
 .srcbox ul { margin:6px 0; padding-left:20px; }
+main .katex-display { overflow-x: auto; overflow-y: hidden; padding: 2px 0 6px; }
+main .katex-mathml { position: absolute; clip: rect(1px,1px,1px,1px); width: 1px; height: 1px; overflow: hidden; }
+main table { display: block; max-width: 100%; overflow-x: auto; }
 </style>
 </head>
 <body>
@@ -98,7 +101,8 @@ table.el th { color:#3a3a42; font-weight:600; }
     <text x="330" y="96" style="font:12px system-ui;fill:#155e75">γV — равнодействующая давления</text>
     <circle cx="320" cy="110" r="4" fill="#b3382e"/>
     <text x="296" y="108" style="font:12px system-ui;fill:#b3382e">G</text>
-    <text x="20" y="286" style="font:11px system-ui;fill:#6b6b74">эпюры давления по контуру шпангоута: горизонтальные составляющие взаимно уничтожаются, донная даёт силу поддержания γV, приложенную в центре величины C</text>
+    <text x="20" y="272" style="font:11px system-ui;fill:#6b6b74">эпюры давления по контуру шпангоута: горизонтальные составляющие взаимно уничтожаются,</text>
+    <text x="20" y="288" style="font:11px system-ui;fill:#6b6b74">снизу остаётся сила поддержания γV, приложенная в центре величины C</text>
   </svg>
 
   <h2>1.2. Условия равновесия и их число</h2>
@@ -150,9 +154,9 @@ table.el th { color:#3a3a42; font-weight:600; }
       <tr><td>Площадь шпангоута</td><td>\(\omega(x)=\int\limits_{-y}^{y}\!\!\int\limits_0^T dz\,dy\)</td><td>\(\omega(x) = 2\int_0^T y(x,z)\,dz\)</td><td>на миделе 50,2 м²</td></tr>
       <tr><td>Объёмное водоизмещение</td><td>\(V=\iiint dV\)</td><td>\(V = \int_0^L \omega(x)\,dx\)</td><td>3969 м³ (D = 4068 т)</td></tr>
       <tr><td>Площадь ватерлинии</td><td>\(S=\iint dS\)</td><td>\(S = \int_0^L 2y(x,T)\,dx\)</td><td>924 м²</td></tr>
-      <tr><td>Абсцисса центра величины</td><td>\(x_c = \frac1V\iiint x\,dV\)</td><td>\(\frac1V\int_0^L \omega x\,dx\)</td><td>+3,60 м от миделя</td></tr>
+      <tr><td>Абсцисса центра величины</td><td>\(x_c = \frac1V\iiint x\,dV\)</td><td>\(\frac1V\int_0^L \omega x\,dx\)</td><td>3,60 м в корму от миделя</td></tr>
       <tr><td>Аппликата центра величины</td><td>\(z_c = \frac1V\iiint z\,dV\)</td><td>\(\frac1V\int_0^L\!\!\int_0^T 2yz\,dz\,dx\)</td><td>3,16 м над ОП</td></tr>
-      <tr><td>Абсцисса центра тяжести ВЛ</td><td>\(x_f = \frac1S\iint x\,dS\)</td><td>\(\frac1S\int_0^L 2yx\,dx\)</td><td>+3,60 м от миделя</td></tr>
+      <tr><td>Абсцисса центра тяжести ВЛ</td><td>\(x_f = \frac1S\iint x\,dS\)</td><td>\(\frac1S\int_0^L 2yx\,dx\)</td><td>3,60 м в корму от миделя</td></tr>
       <tr><td>Момент инерции ВЛ поперечный</td><td>\(I_x = \iint y^2\,dS\)</td><td>\(\int_0^L \tfrac23\,y^3\,dx\)</td><td>8006 м⁴</td></tr>
       <tr><td>Момент инерции ВЛ продольный</td><td>\(I_{yf} = \iint (x-x_f)^2 dS\)</td><td>\(\int_0^L 2y\,(x-x_f)^2 dx\)</td><td>582 600 м⁴</td></tr>
     </tbody>
@@ -218,10 +222,11 @@ table.el th { color:#3a3a42; font-weight:600; }
     <line x1="335" y1="210" x2="335" y2="56" stroke="#8a8a92" stroke-width="1" stroke-dasharray="4 3"/>
     <text x="300" y="52" style="font:11px system-ui;fill:#6b6b74">мидель</text>
     <line x1="354" y1="210" x2="354" y2="70" stroke="#b3382e" stroke-width="1.4" stroke-dasharray="4 3"/>
-    <text x="360" y="66" style="font:11px system-ui;fill:#b3382e">x_c = +3,6 м</text>
+    <text x="360" y="66" style="font:11px system-ui;fill:#b3382e">x_c: 3,6 м в корму</text>
     <text x="86" y="238" style="font:11px system-ui;fill:#155e75">строевая по шпангоутам ω(x): площадь под кривой = V = 3969 м³</text>
     <text x="86" y="254" style="font:11px system-ui;fill:#6b6b74">центр тяжести этой площади по длине = абсцисса центра величины x_c</text>
-    <text x="86" y="276" style="font:11px system-ui;fill:#6b6b74">масштаб Бонжана даёт ω для любого уровня воды: по нему строят строевую для наклонной ватерлинии — так считают дифферент и посадку на волне</text>
+    <text x="86" y="272" style="font:11px system-ui;fill:#6b6b74">масштаб Бонжана даёт ω для любого уровня воды: по нему строят строевую</text>
+    <text x="86" y="288" style="font:11px system-ui;fill:#6b6b74">для наклонной ватерлинии — так считают дифферент и аварийную посадку</text>
   </svg>
 
   <svg viewBox="0 0 640 300" class="geo-board" style="max-width:640px" role="img" aria-label="Масштаб Бонжана: кривая площади шпангоута в функции уровня воды">
@@ -248,10 +253,13 @@ table.el th { color:#3a3a42; font-weight:600; }
   <h2>1.5. Коэффициенты полноты</h2>
   <p>Чтобы говорить о форме корпуса числами, интегралы нормируют на объёмы и
   площади описанных параллелепипедов и прямоугольников:</p>
-  <p style="text-align:center">$$\delta = \frac{V}{LBT}\ (\text{общая}), \quad
-  \alpha = \frac{S}{LB}\ (\text{ватерлинии}), \quad
-  \beta = \frac{\omega_{\text{м}}}{BT}\ (\text{мидель}), \quad
-  \varphi = \frac{V}{\omega_{\text{м}} L}\ (\text{продольная}).$$</p>
+  <p style="text-align:center">$$\delta = \frac{V}{LBT},\qquad
+  \alpha = \frac{S}{LB},\qquad
+  \beta = \frac{\omega_0}{BT},\qquad
+  \varphi = \frac{V}{\omega_0\,L}.$$</p>
+  <p>Здесь δ — коэффициент общей полноты, α — полноты ватерлинии,
+  β — полноты мидель-шпангоута (\(\omega_0\) — площадь мидель-шпангоута),
+  φ — продольной полноты.</p>
   <p>Между ними есть тождество, которое стоит понимать, а не запоминать:
   \(\delta = \beta\,\varphi\) — «объём = площадь миделя × длина × продольная
   полнота», и та же площадь миделя = \(BT\beta\). Для нашего корпуса при
@@ -430,23 +438,27 @@ table.el th { color:#3a3a42; font-weight:600; }
   <div class="srcbox">
     <h2>Откуда это</h2>
     <ul>
-      <li><b>Вывод закона Архимеда через интеграл давления и теорему
-      Остроградского — Гаусса</b>, различение равновесия и остойчивости —
-      по Biran, <i>Ship Hydrostatics and Stability</i> (гл. «Definitions,
-      Hydrostatic Forces»), с русскими обозначениями по
-      Семёнову-Тян-Шанскому.</li>
+      <li><b>Вывод закона Архимеда через интеграл давления, различение
+      равновесия и остойчивости</b> — Biran A. B., López-Pulido R.,
+      <i>Ship Hydrostatics and Stability</i>, 2nd ed.
+      (Butterworth-Heinemann, 2014), гл. 1–2; обозначения и терминология —
+      по Семёнову-Тян-Шанскому.</li>
       <li><b>Уравнения плавучести, параметры посадки, элементы теоретического
       чертежа, коэффициенты полноты</b> — Семёнов-Тян-Шанский В. В. «Статика и
       динамика корабля»; Борисов, Луговский, Мирохин, Рождественский «Статика
       корабля»; Справочник по теории корабля под ред. Я. И. Войткунского, т. 2.</li>
       <li><b>Квадратуры (трапеции, Симпсон), строевая по шпангоутам, масштаб
       Бонжана</b> — классическая русская расчётная схема (Семёнов-Тян-Шанский;
-      Войткунский, т. 2); англоязычный аналог — Lewis (ed.),
-      <i>Principles of Naval Architecture</i>, vol. I, ch. II.</li>
-      <li><b>Число тонн на сантиметр (TPC), поправка на пресную воду (FWA),
-      осадки и draft survey</b> — Tupper, <i>Introduction to Naval
-      Architecture</i>; Barrass, Derrett, <i>Ship Stability for Masters and
-      Mates</i> (там же формула \( \mathrm{FWA} = D/(4q) \)).</li>
+      Войткунский, т. 2; Борисов и др. «Расчёты по статике корабля»);
+      англоязычный аналог — Lewis E. V. (ed.), <i>Principles of Naval
+      Architecture</i>, 2nd revision, vol. I (SNAME, 1988), гл. I «Ship
+      Geometry»; анализ погрешности квадратур — Biran, гл. 3.</li>
+      <li><b>Число тонн на сантиметр, поправка на пресную и портовую воду,
+      осадки</b> — Derrett D. R., перераб. Barrass C. B., <i>Ship Stability
+      for Masters and Mates</i>, 5th ed. (Butterworth-Heinemann, 1999): там
+      вывод \( \mathrm{FWA} = D/(4q) \) и поправка на доковую воду
+      \( \mathrm{DWA} = \mathrm{FWA}\,(1{,}025-\rho)/0{,}025 \);
+      те же величины (TPC, MTcm) — в PNA, vol. I, гл. I.</li>
       <li><b>Надводный борт, грузовая марка, предельная линия погружения</b> —
       Международная конвенция о грузовой марке 1966 г. (с поправками) и
       Правила классификации и постройки морских судов РС; см.
