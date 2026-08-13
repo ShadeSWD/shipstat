@@ -88,18 +88,30 @@ function miniChart(host, title, unit, pts, opts = {}) {
 /* ---------- состояние и управление ---------- */
 const stS = { T: 5.6, zg: 4.8, Bh: 16, full: 0.62, bilge: 5.6, curve: null };
 
+/* Поправка ширины обводов. Полуширота задана кривой Безье, которая не
+ * проходит через средние опорные точки, поэтому фактическая наибольшая
+ * ширина модели меньше номинальной B. По умолчанию коэффициент равен
+ * единице (корпус и все расчёты страницы прежние); подстановка судна из
+ * банка прототипов выставляет его так, чтобы фактическая ширина совпала с
+ * шириной прототипа. */
+let HULL_BEAM_K = 1;
+
 function applyHullParams() {
-  HULL.W[1][1] = stS.Bh / 2 * 1.025;
-  HULL.W[2][1] = stS.Bh / 2 * 0.99;
+  HULL.W[1][1] = stS.Bh / 2 * 1.025 * HULL_BEAM_K;
+  HULL.W[2][1] = stS.Bh / 2 * 0.99 * HULL_BEAM_K;
   HULL.S[1][0] = stS.full;           // полнота (скуловая точка вбок)
   HULL.S[2][1] = stS.bilge;          // высота выхода борта
 }
 
+let hullBoard = null;   // поле эскиза создаётся один раз и перерисовывается
+
 function drawHullSketch(h) {
-  const B = new Board('#b-hullsketch', { w: 790, h: 340 });
+  const B = hullBoard || (hullBoard = new Board('#b-hullsketch', { w: 790, h: 340 }));
   B.clear();
   // полуширота (вид сверху) и мидель
-  const sx = 40, sy = 90, kx = 3.4, ky = 6;
+  // масштабы эскиза подстраиваются под размерения корпуса (при значениях по
+  // умолчанию L = 100 м, B = 16 м, H = 9,6 м дают прежние 3,4 / 6 / 18)
+  const sx = 40, sy = 90, kx = 340 / HULL.L, ky = kx * 1.76;
   for (const f of [0.25, 0.5, 0.75, 1]) {
     const pts = [];
     for (let i = 0; i <= 48; i++) {
@@ -119,7 +131,9 @@ function drawHullSketch(h) {
     B.label([xc, sy], 'x꜀ = x_f', 'blue', 6, -8);
   }
   // мидель-шпангоут с осадкой
-  const mx = 540, myb = 320, kk = 18;
+  const mx = 540, myb = 320;
+  const kk = Math.min(18, 144 / (stS.Bh / 2), 173 / HULL.H);
+  const hw = Math.max(stS.Bh / 2 * 1.2, HULL.H);   // полуширина поля мидель-эскиза
   const sec = [];
   for (let i = 0; i <= 30; i++) {
     const z = i / 30 * HULL.H;
@@ -129,8 +143,8 @@ function drawHullSketch(h) {
   B.poly(sec.map(p => [2 * mx - p[0], p[1]]), 'ln', 'main');
   B.line([mx, myb], [mx, myb - (HULL.H + 2) * kk], 'ln-thin gray ln-dash');
   // ватерлиния
-  B.line([mx - 9.6 * kk, myb - stS.T * kk], [mx + 9.6 * kk, myb - stS.T * kk], 'ln blue');
-  B.label([mx + 9.6 * kk - 22, myb - stS.T * kk - 6], 'ВЛ', 'blue', 0, 0);
+  B.line([mx - hw * kk, myb - stS.T * kk], [mx + hw * kk, myb - stS.T * kk], 'ln blue');
+  B.label([mx + hw * kk - 22, myb - stS.T * kk - 6], 'ВЛ', 'blue', 0, 0);
   B.label([mx - 36, myb - (HULL.H + 2) * kk + 2], 'мидель-шпангоут', 'gray', 0, 0);
   // ключевые точки остойчивости на ДП: C (центр величины), G, m (метацентр)
   if (h) {
@@ -140,7 +154,7 @@ function drawHullSketch(h) {
     B.dot(pG, 'red', 4); B.label(pG, 'G', 'red', 8, 4);
     B.dot(pM, 'green', 4); B.label(pM, 'm', 'green', 8, -4);
     // выноска r = Cm слева, h = Gm справа
-    const xr = mx - 9.6 * kk - 28, xh = mx + 9.6 * kk + 14;
+    const xr = mx - hw * kk - 28, xh = mx + hw * kk + 14;
     B.line(pC, [xr, pC[1]], 'ln-link'); B.line(pM, [xr, pM[1]], 'ln-link');
     B.dim([xr, pC[1]], [xr, pM[1]], 'r=' + fmt(h.r, 2), 0);
     B.line(pG, [xh, pG[1]], 'ln-link'); B.line(pM, [xh, pM[1]], 'ln-link');
@@ -180,7 +194,12 @@ function recompute() {
 
   // кривые элементов (малые кратные)
   const Ts = [], data = { V: [], S: [], xc: [], xf: [], zc: [], r: [], KM: [] };
-  for (let t = 1; t <= 8.01; t += 0.35) {
+  // диапазон кривых элементов покрывает текущую осадку (для судов из банка
+  // прототипов она может быть больше исходных 8 м); при осадках по умолчанию
+  // сетка прежняя: от 1 м до 8 м с шагом 0,35 м
+  const tmax = Math.max(8.01, stS.T * 1.05);
+  const tstep = tmax <= 8.01 ? 0.35 : tmax / 23;
+  for (let t = 1; t <= tmax + 1e-9; t += tstep) {
     const hh = hydrostatics(t);
     data.V.push([t, hh.V]); data.S.push([t, hh.Awl]);
     data.xc.push([t, hh.xc - HULL.L / 2]); data.xf.push([t, hh.xf - HULL.L / 2]);
@@ -192,7 +211,7 @@ function recompute() {
   miniChart(document.getElementById('c-xc'), 'x꜀ и x_f от миделя', 'м', data.xc, { extra: data.xf, marks: mark, mainLabel: 'x꜀', extraLabel: 'x_f' });
   miniChart(document.getElementById('c-zc'), 'Центр величины z꜀', 'м', data.zc, { marks: mark });
   miniChart(document.getElementById('c-r'), 'Метацентрич. радиус r', 'м', data.r, { marks: mark });
-  miniChart(document.getElementById('c-KM'), 'Метацентр z_m и z_g', 'м', data.KM, { marks: mark, extra: [[1, stS.zg], [8, stS.zg]], mainLabel: 'z_m', extraLabel: 'z_g' });
+  miniChart(document.getElementById('c-KM'), 'Метацентр z_m и z_g', 'м', data.KM, { marks: mark, extra: [[1, stS.zg], [tmax, stS.zg]], mainLabel: 'z_m', extraLabel: 'z_g' });
 
   // ДСО
   const V0 = h.V, zg = stS.zg;

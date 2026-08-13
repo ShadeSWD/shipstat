@@ -19,6 +19,20 @@
   всё пересчитывается на лету.</p>
 
   <div class="panel">
+    <div class="controls" style="margin-bottom:6px">
+      <label class="small" for="proto-bank">прототип из банка судов:</label>
+      <select id="proto-bank" style="font:14px system-ui;padding:4px 6px;max-width:100%">
+        <option value="">— загрузка банка судов… —</option>
+      </select>
+    </div>
+    <p class="small" id="proto-bank-note" style="display:none;margin:0 0 8px"></p>
+    <p class="small" style="margin:0 0 8px">Банк — шестнадцать оцифрованных
+    учебных вариантов судов справочника кластера
+    (<a href="https://shadeswd.duckdns.org/ref/ships">суда-прототипы</a>):
+    выбор судна перестраивает параметрический корпус под его длину, ширину и
+    осадку, а полнота шпангоута подбирается под водоизмещение прототипа.
+    Корпус по умолчанию (L = 100 м, B = 16 м, T = 5,6 м) остаётся прежним —
+    банк только добавляет возможность выбрать реальное судно.</p>
     <div class="controls">
       <label>осадка T <input type="range" id="in-T" min="2" max="8" step="0.1" value="5.6">
         <span class="readout" id="out-T"></span></label>
@@ -123,5 +137,6 @@
 <script src="assets/geo.js"></script>
 <script src="assets/hydro.js"></script>
 <script src="assets/solver.js"></script>
+<script src="assets/proto-bank.js"></script>
 </body>
 </html>
