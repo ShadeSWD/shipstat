@@ -129,7 +129,7 @@
     s += `<path d="${path(fns.short)}" fill="none" stroke="#6b6b74" stroke-width="1.6" stroke-dasharray="6 4"/>`;
     s += `<path d="${path(fns.kili)}" fill="none" stroke="#1a7f37" stroke-width="1.8"/>`;
     s += `<path d="${path(fns.full)}" fill="none" stroke="#155e75" stroke-width="2"/>`;
-    // резонанс по сетке ω = 0,05…2,00 (как в работе)
+    // резонанс по сетке ω = 0,05…2,00
     let pw = 0.05, pv = -1, sv = -1, sw = 0.05;
     for (let i = 1; i <= 40; i++) {
       const w = i * 0.05, v = fns.full(w), v2 = fns.short(w);
