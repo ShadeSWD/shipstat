@@ -65,7 +65,7 @@
   /* ---------- АЧХ ---------- */
   const kap = (Rb, w) => Math.exp(-4.2 * (Rb * w) ** 2);
   function makeFns(K, bug) {
-    // bug=true: как в учебном расчёте — в знаменателе вместо (ω_θ²−ω²) стоит (ω_θ−ω)
+    // упрощённая запись: в знаменателе (ω_θ − ω) вместо (ω_θ² − ω²)
     const P = w => bug ? (K.wt - w) : (K.wt2 - w * w);
     return {
       full: w => kap(K.Rb, w) * Math.sqrt(((K.wt2 - w * w * K.lamBar) ** 2 + (K.nu2 * w) ** 2) / (P(w) ** 2 + (K.nu2 * w) ** 2)),
