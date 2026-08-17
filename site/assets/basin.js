@@ -3,20 +3,7 @@
  * экспериментальные точки, вся штатная обработка работает и от исходных, и от снятых данных. */
 'use strict';
 (function () {
-  const G = 9.81;
-  const $ = id => document.getElementById(id);
-  const fmt = (v, d = 2) => isFinite(v) ? v.toLocaleString('ru-RU', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—';
-  function fmtE(v, d = 2) {
-    if (!isFinite(v) || v === 0) return '0';
-    const e = Math.floor(Math.log10(Math.abs(v)));
-    const m = v / Math.pow(10, e);
-    const sup = String(e).replace('-', '⁻').replace(/\d/g, c => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+c]);
-    return fmt(m, d) + '·10' + sup;
-  }
-  const stepRow = (f, sub, res, id) =>
-    `<div style="margin:5px 0;font:14px system-ui"><span style="color:#3a3a42">${f}</span>` +
-    (sub ? ` = <span style="color:#6b6b74">${sub}</span>` : '') +
-    ` = <b${id ? ` id="${id}"` : ''}>${res}</b></div>`;
+  /* $, G, RHO, fmt, fmtE, stepRow, poly — в common.js */
   const td = (v, extra) => `<td style="text-align:right;padding:1px 7px${extra || ''}">${v}</td>`;
 
   /* МНК-аппроксимация полиномом deg ≤ 2 — «осредняющая кривая» для снятых точек */
@@ -152,8 +139,7 @@
       s += `<line x1="${X(v)}" y1="${H - padB}" x2="${X(v)}" y2="${H - padB + 4}" stroke="#6b6b74"/>` +
         `<text x="${X(v)}" y="${H - padB + 16}" text-anchor="middle" style="font:11px system-ui;fill:#6b6b74">${v}</text>`;
     s += `<line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="#6b6b74" stroke-width="1.2"/>`;
-    const poly = pts => pts.map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
-    s += `<path d="${poly(ptsL.slice().reverse())}" fill="none" stroke="#b3382e" stroke-width="1.8"/>`;
+    s += `<path d="${poly(ptsL.slice().reverse(), X, Y)}" fill="none" stroke="#b3382e" stroke-width="1.8"/>`;
     for (const [x, y] of ptsL) s += `<circle cx="${X(x)}" cy="${Y(y)}" r="2.6" fill="#b3382e"/>`;
     for (const [x, y] of ptsB) s += `<circle cx="${X(x)}" cy="${Y(y)}" r="3.4" fill="none" stroke="#155e75" stroke-width="1.8"/>`;
     s += `<text x="${W - padR}" y="${H - 8}" text-anchor="end" style="font:12px system-ui;fill:#6b6b74">θ_ср, град</text>` +
@@ -209,10 +195,9 @@
     $('vx1-model').setAttribute('transform', `rotate(${(-th).toFixed(2)} 160 150)`);
     $('vx1-deg').textContent = `θ = ${fmt(th, 1)}°`;
     // осциллограмма с огибающими
-    const P = a => a.map((p, i) => (i ? 'L' : 'M') + v1x(p[0]).toFixed(1) + ' ' + v1y(p[1]).toFixed(1)).join(' ');
-    $('vx1-trace').setAttribute('d', P(V1.trace));
-    $('vx1-envU').setAttribute('d', P(V1.env));
-    $('vx1-envL').setAttribute('d', P(V1.env.map(p => [p[0], -p[1]])));
+    $('vx1-trace').setAttribute('d', poly(V1.trace, v1x, v1y));
+    $('vx1-envU').setAttribute('d', poly(V1.env, v1x, v1y));
+    $('vx1-envL').setAttribute('d', poly(V1.env.map(p => [p[0], -p[1]]), v1x, v1y));
     $('vx1-clock').textContent = `t = ${fmt(V1.t, 1)} с · размахов: ${V1.peaks.length} · θa = ${fmt(V1.A, 1)}°`;
     if (V1.run) V1.raf = requestAnimationFrame(v1Frame);
     else {
@@ -348,7 +333,7 @@
     for (let v = 0; v <= x1; v += xstep)
       s += `<line x1="${X(v)}" y1="${H - padB}" x2="${X(v)}" y2="${H - padB + 4}" stroke="#6b6b74"/>` +
         `<text x="${X(v)}" y="${H - padB + 16}" text-anchor="middle" style="font:11px system-ui;fill:#6b6b74">${fmt(v, x1 > 6 ? 0 : 1)}</text>`;
-    s += `<path d="${pts.map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ')}" fill="none" stroke="${color}" stroke-width="2"/>`;
+    s += `<path d="${poly(pts, X, Y)}" fill="none" stroke="${color}" stroke-width="2"/>`;
     pts.forEach((p, i) => { s += `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="${i === iSel ? 4.4 : 3}" fill="${i === iSel ? '#b3382e' : color}"/>`; });
     s += `<text x="${padL}" y="${padT - 10}" style="font:12.5px system-ui;fill:#16161a">${title}</text>` +
       `<text x="${W - padR}" y="${H - 8}" text-anchor="end" style="font:12px system-ui;fill:#6b6b74">${xl}</text>` +
@@ -591,16 +576,15 @@
     function stormCalc() {
       const L = +$('st-L').value, B = +$('st-B').value, d = +$('st-d').value,
         Fr = +$('st-Fr').value, s = SEA[$('st-b').value];
-      const rho = 1.025, g = 9.81;
-      const Cs = 2.77e5 * rho * g * B * B / Math.pow(L, 1.5) * (1 + 4.4 * d);
+      const Cs = 2.77e5 * RHO * G * B * B / Math.pow(L, 1.5) * (1 + 4.4 * d);
       const fa = fAlpha(s.a);
       const Raw = Cs * Math.pow(Fr, 0.687) * Math.pow(s.h, 2.5) * fa;
-      const v = Fr * Math.sqrt(g * L);
+      const v = Fr * Math.sqrt(G * L);
       const Va = v + s.w;
       const Raa = 1.08e-3 * L * Va * Va;
       const o = [];
       o.push(stepRow('C_s = 2,77·10⁵·ρgB²/L^1,5·(1+4,4δ)',
-        `2,77·10⁵·${fmt(rho, 3)}·9,81·${fmt(B, 1)}²/${fmt(L, 1)}^1,5·(1+4,4·${fmt(d, 3)})`,
+        `2,77·10⁵·${fmt(RHO, 3)}·9,81·${fmt(B, 1)}²/${fmt(L, 1)}^1,5·(1+4,4·${fmt(d, 3)})`,
         `${fmt(Cs, 0)} кН/м^2,5`));
       o.push(stepRow('скорость: v = Fr·√(gL)', `${fmt(Fr, 2)}·√(9,81·${fmt(L, 1)})`, `${fmt(v, 2)} м/с`));
       o.push(stepRow('f(α) по таблице', `α = ${fmt(s.a, 2)}`, fa.toExponential(2)));

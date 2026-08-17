@@ -3,24 +3,7 @@
  * слемингом. Линейная теория, отрисовка SVG в requestAnimationFrame. */
 'use strict';
 (function () {
-  const $ = id => document.getElementById(id);
-  const G = 9.81, KN = 0.5144;
-  const D2R = Math.PI / 180, R2D = 180 / Math.PI;
-  const fmt = (v, d = 2) => (isFinite(v)
-    ? v.toLocaleString('ru-RU', { minimumFractionDigits: d, maximumFractionDigits: d })
-    : '—');
-  const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
-  const cell = (k, v, cls) =>
-    `<div class="cell"><span class="k">${k}</span><span class="v"${cls ? ` style="color:${cls}"` : ''}>${v}</span></div>`;
-  const poly = (pts, X, Y) => pts.map((p, i) =>
-    (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
-  function onScreen(el) {
-    if (!el) return false;
-    const r = el.getBoundingClientRect();
-    return r.bottom > -60 && r.top < (window.innerHeight || 800) + 60;
-  }
-  const AX = '#6b6b74', ACC = '#155e75', RED = '#b3382e', GRN = '#1a7f37', BLU = '#2b4fa0', VIO = '#7a3fa0';
-  const fs = (size, fill) => `font:${size}px system-ui;fill:${fill}`;
+  /* $, G, KN, D2R/R2D, fmt, clamp, cell, poly, onScreen, палитра и fs — в common.js */
 
   /* судно, общее для обеих анимаций (см. числовой пример на странице) */
   const SHIP = { L: 140, B: 20, d: 8, Tpsi: 7.4, Tzeta: 6.3, Ttheta: 12.0 };
@@ -238,7 +221,7 @@
       <rect x="0" y="${Y0}" width="720" height="${248 - Y0}" fill="rgba(21,94,117,.10)"/>
       <path id="pt-wave" d="" fill="rgba(21,94,117,.16)" stroke="${ACC}" stroke-width="1.6"/>
       <text x="10" y="18" style="${fs(12, AX)}">вид сбоку, вертикальный масштаб увеличен в 2,5 раза</text>
-      <g id="pt-ship">
+      <g id="pt-ship" transform="translate(360 150)">
         <path d="M -150 -26 Q 0 -14 152 -36 L 140 18 Q 133 40 112 40 L -122 40 Q -150 40 -150 14 Z"
               fill="#fff" stroke="#16161a" stroke-width="2"/>
         <line x1="-150" y1="0" x2="150" y2="0" stroke="#9a9aa2" stroke-width="1" stroke-dasharray="5 4"/>
@@ -249,7 +232,7 @@
       </g>
       <line id="pt-rel" x1="0" y1="0" x2="0" y2="0" stroke="${RED}" stroke-width="2.2"/>
       <text id="pt-rel-t" x="0" y="0" text-anchor="middle" style="font:600 11px system-ui;fill:${RED};paint-order:stroke;stroke:#ffffffcc;stroke-width:3px"></text>
-      <g id="pt-slam" opacity="0">
+      <g id="pt-slam" opacity="0" transform="translate(360 156)">
         <path d="M -14 0 L 14 0 M 0 -14 L 0 14 M -10 -10 L 10 10 M -10 10 L 10 -10"
               stroke="${RED}" stroke-width="3" stroke-linecap="round"/>
       </g>

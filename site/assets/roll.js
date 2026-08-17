@@ -1,8 +1,7 @@
 /* Расчёт бортовой качки — курсовая «Расчёт бортовой качки» (вариант АI) как живой калькулятор. */
 'use strict';
 (function () {
-  const G = 9.81, RHO = 1.025;
-  const $ = id => document.getElementById(id);
+  /* $, G, RHO, fmt, fmtE, stepRow — в common.js */
 
   /* ---------- данные, переданные по URL (из бассейна или из расчёта посадки) ---------- */
   const Q = new URLSearchParams(location.search);
@@ -11,24 +10,6 @@
     Ttheta: (qn('Ttheta') > 0.01) ? qn('Ttheta') : null, // период из опыта, с
     nu2: (qn('nu2') > 0) ? qn('nu2') : null,             // 2ν_θ из опыта, 1/с
   };
-
-  /* ---------- форматирование ---------- */
-  function fmt(v, d = 2) {
-    if (!isFinite(v)) return '—';
-    return v.toLocaleString('ru-RU', { minimumFractionDigits: d, maximumFractionDigits: d });
-  }
-  function fmtE(v, d = 2) { // 2,65·10⁶
-    if (!isFinite(v) || v === 0) return '0';
-    const e = Math.floor(Math.log10(Math.abs(v)));
-    const m = v / Math.pow(10, e);
-    const sup = String(e).replace(/-/, '⁻').replace(/\d/g, c => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+c]);
-    return fmt(m, d) + '·10' + sup;
-  }
-  function stepRow(f, sub, res, id) {
-    return `<div style="margin:5px 0;font:14px system-ui"><span style="color:#3a3a42">${f}</span>` +
-      (sub ? ` = <span style="color:#6b6b74">${sub}</span>` : '') +
-      ` = <b${id ? ` id="${id}"` : ''}>${res}</b></div>`;
-  }
 
   /* ---------- канонический расчёт постоянных ---------- */
   function chain(p) {

@@ -65,7 +65,7 @@ function miniChart(host, title, unit, pts, opts = {}) {
   tt.textContent = title + (unit ? `, ${unit}` : '');
   // ховер: кросшэйр + значение
   const hoverLn = svgEl('line', { y1: padT, y2: H - padB, stroke: '#155e75', 'stroke-width': 1, opacity: 0 }, svg);
-  const hoverDot = svgEl('circle', { r: 3.4, fill: opts.color || '#155e75', opacity: 0 }, svg);
+  const hoverDot = svgEl('circle', { cx: padL, cy: padT, r: 3.4, fill: opts.color || '#155e75', opacity: 0 }, svg);
   const hoverTx = svgEl('text', { opacity: 0 }, svg);
   hoverTx.style.cssText = 'font:600 10.5px system-ui;fill:#16161a;paint-order:stroke;stroke:#ffffffdd;stroke-width:3px';
   svg.addEventListener('pointermove', ev => {
@@ -323,7 +323,7 @@ function miniChartBig(host, curve, hMeta) {
   tt.style.cssText = 'font:600 12px system-ui;fill:#3a3a42';
   tt.textContent = 'Диаграмма статической остойчивости: плечо l(θ), м';
   // ховер
-  const hd = svgEl('circle', { r: 4, fill: '#155e75', opacity: 0 }, svg);
+  const hd = svgEl('circle', { cx: padL, cy: padT, r: 4, fill: '#155e75', opacity: 0 }, svg);
   const htx = svgEl('text', { opacity: 0 }, svg);
   htx.style.cssText = 'font:600 11px system-ui;fill:#16161a;paint-order:stroke;stroke:#ffffffdd;stroke-width:3px';
   svg.addEventListener('pointermove', ev => {

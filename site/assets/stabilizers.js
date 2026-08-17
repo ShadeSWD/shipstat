@@ -3,34 +3,30 @@
  * Численное интегрирование уравнений качки + отрисовка SVG в rAF. */
 'use strict';
 (function () {
-  const $ = id => document.getElementById(id);
-  const G = 9.81, RHO = 1.025;                 // м/с², т/м³
-  const D2R = Math.PI / 180, R2D = 180 / Math.PI;
-
-  const fmt = (v, d = 2) => (isFinite(v)
-    ? v.toLocaleString('ru-RU', { minimumFractionDigits: d, maximumFractionDigits: d })
-    : '—');
-  const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
-  const cell = (k, v, cls) =>
-    `<div class="cell"><span class="k">${k}</span><span class="v"${cls ? ` style="color:${cls}"` : ''}>${v}</span></div>`;
+  /* $, G, RHO, KN, D2R/R2D, fmt, clamp, cell, poly, onScreen, палитра и fs — в common.js */
 
   /* контур мидель-шпангоута: вертикальные борта, скруглённые скулы */
   const hullPath = (cx, cy, w, up, dn, r) =>
     `M ${cx - w} ${cy - up} L ${cx - w} ${cy + dn - 26} Q ${cx - w} ${cy + dn} ${cx - w + r} ${cy + dn}` +
     ` L ${cx + w - r} ${cy + dn} Q ${cx + w} ${cy + dn} ${cx + w} ${cy + dn - 26} L ${cx + w} ${cy - up}`;
 
-  const poly = (pts, X, Y) => pts.map((p, i) =>
-    (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
+  /* засечки и подписи вертикальной шкалы осциллограммы (одинаковы у трёх схем) */
+  const yTicks = (Y, vals, xIn, xOut, xText) => vals.map(v =>
+    `<line x1="${xIn}" y1="${Y(v)}" x2="${xOut}" y2="${Y(v)}" stroke="${AX}"/>` +
+    `<text x="${xText}" y="${Y(v) + 4}" text-anchor="end" style="${fs(10.5, AX)}">${v}</text>`).join('');
 
-  /* рисуем только то, что на экране: экономит батарею на длинной странице */
-  function onScreen(el) {
-    if (!el) return false;
-    const r = el.getBoundingClientRect();
-    return r.bottom > -60 && r.top < (window.innerHeight || 800) + 60;
+  /* установившиеся амплитуды качки: теневая копия модели прокручивается без
+     отрисовки — показания не ждут, пока успокоится «живая» модель.
+     guard — страховка от разгона решения (нужна только рулям) */
+  function steadyAmps(phys, S, h, nWarm, nMeas, guard) {
+    for (let i = 0; i < nWarm; i++) { phys(S, h); if (guard) guard(S); }
+    let pk = 0, pk0 = 0;
+    for (let i = 0; i < nMeas; i++) {
+      phys(S, h); if (guard) guard(S);
+      pk = Math.max(pk, Math.abs(S.x)); pk0 = Math.max(pk0, Math.abs(S.x0));
+    }
+    return [pk * R2D, pk0 * R2D];
   }
-
-  const AX = '#6b6b74', ACC = '#155e75', RED = '#b3382e', GRN = '#1a7f37', BLU = '#2b4fa0';
-  const fs = (size, fill) => `font:${size}px system-ui;fill:${fill}`;
 
   /* =====================================================================
    * 1. СКУЛОВЫЕ КИЛИ — свободные затухающие колебания с килями и без
@@ -85,11 +81,7 @@
     /* осциллограмма */
     s += `<line x1="356" y1="${bkY(0)}" x2="704" y2="${bkY(0)}" stroke="${AX}" stroke-width="1.1"/>
       <line x1="356" y1="52" x2="356" y2="268" stroke="${AX}" stroke-width="1.1"/>`;
-    for (let v = -20; v <= 20; v += 10) {
-      if (!v) continue;
-      s += `<line x1="352" y1="${bkY(v)}" x2="356" y2="${bkY(v)}" stroke="${AX}"/>` +
-        `<text x="349" y="${bkY(v) + 4}" text-anchor="end" style="${fs(10.5, AX)}">${v}</text>`;
-    }
+    s += yTicks(bkY, [-20, -10, 10, 20], 352, 356, 349);
     for (let t = 0; t <= BK.TMAX; t += 8)
       s += `<line x1="${bkX(t)}" y1="${bkY(0)}" x2="${bkX(t)}" y2="${bkY(0) + 4}" stroke="${AX}"/>` +
         `<text x="${bkX(t)}" y="${bkY(0) + 16}" text-anchor="middle" style="${fs(10, AX)}">${t}</text>`;
@@ -383,7 +375,7 @@
     return clamp(cl, -1.35, 1.35);
   }
   function fnMoment(alDeg) {                 // кН·м, пара крыльев
-    const v = FN.v * 0.5144;
+    const v = FN.v * KN;
     return 2 * (RHO / 2) * v * v * FN.S * fnCL(alDeg) * FN.z;
   }
 
@@ -402,8 +394,8 @@
         <line x1="98" y1="109" x2="242" y2="109" stroke="#16161a" stroke-width="2"/>
         <line x1="170" y1="203" x2="170" y2="62" stroke="${RED}" stroke-width="1.3"/>
         <circle cx="170" cy="165" r="3.2" fill="#16161a"/>
-        <g id="fn-fL"><rect x="-30" y="-3.2" width="30" height="6.4" rx="3" fill="${BLU}"/></g>
-        <g id="fn-fR"><rect x="0" y="-3.2" width="30" height="6.4" rx="3" fill="${BLU}"/></g>
+        <g id="fn-fL" transform="translate(102 186)"><rect x="-30" y="-3.2" width="30" height="6.4" rx="3" fill="${BLU}"/></g>
+        <g id="fn-fR" transform="translate(238 186)"><rect x="0" y="-3.2" width="30" height="6.4" rx="3" fill="${BLU}"/></g>
         <line id="fn-arL" x1="0" y1="0" x2="0" y2="0" stroke="${GRN}" stroke-width="2.6" marker-end="url(#fnArr)"/>
         <line id="fn-arR" x1="0" y1="0" x2="0" y2="0" stroke="${GRN}" stroke-width="2.6" marker-end="url(#fnArr)"/>
       </g>
@@ -413,10 +405,7 @@
     s += `<text x="372" y="36" style="${fs(12, AX)}">запись угла крена, последние 40 с</text>
       <line x1="372" y1="${fnY(0)}" x2="710" y2="${fnY(0)}" stroke="${AX}" stroke-width="1.1"/>
       <line x1="372" y1="52" x2="372" y2="292" stroke="${AX}" stroke-width="1.1"/>`;
-    for (let v = -20; v <= 20; v += 10) {
-      s += `<line x1="368" y1="${fnY(v)}" x2="372" y2="${fnY(v)}" stroke="${AX}"/>` +
-        `<text x="365" y="${fnY(v) + 4}" text-anchor="end" style="${fs(10.5, AX)}">${v}</text>`;
-    }
+    s += yTicks(fnY, [-20, -10, 0, 10, 20], 368, 372, 365);
     s += `<text x="352" y="46" style="${fs(11, AX)}">θ, град</text>
       <path id="fn-tr0" d="" fill="none" stroke="#9a9aa2" stroke-width="1.2"/>
       <path id="fn-tr" d="" fill="none" stroke="${ACC}" stroke-width="1.7"/>
@@ -445,21 +434,12 @@
     S.t += h;
   }
 
-  /* установившиеся амплитуды при текущих настройках — теневой расчёт без
-     отрисовки: показания не ждут, пока успокоится «живая» модель */
   function fnSteady() {
     const S = { x: FN.x, vx: FN.vx, x0: FN.x0, vx0: FN.vx0, al: FN.al, t: FN.t, M: 0 };
-    for (let i = 0; i < 40000; i++) {
-      fnPhys(S, 0.005);
-      if (!isFinite(S.x) || Math.abs(S.x) > 1.2) { S.x = Math.sign(S.x || 1) * 1.2; S.vx = 0; }
-    }
-    let pk = 0, pk0 = 0;
-    for (let i = 0; i < 6000; i++) {
-      fnPhys(S, 0.005);
-      if (!isFinite(S.x) || Math.abs(S.x) > 1.2) { S.x = Math.sign(S.x || 1) * 1.2; S.vx = 0; }
-      pk = Math.max(pk, Math.abs(S.x)); pk0 = Math.max(pk0, Math.abs(S.x0));
-    }
-    FN.ampS = pk * R2D; FN.ampN = pk0 * R2D;
+    const guard = s => {
+      if (!isFinite(s.x) || Math.abs(s.x) > 1.2) { s.x = Math.sign(s.x || 1) * 1.2; s.vx = 0; }
+    };
+    [FN.ampS, FN.ampN] = steadyAmps(fnPhys, S, 0.005, 40000, 6000, guard);
   }
 
   function fnStep(dt) {
@@ -496,7 +476,7 @@
     $('fn-v-v').textContent = fmt(FN.v, 1);
     $('fn-s-v').textContent = fmt(FN.S, 1);
     $('fn-k-v').textContent = fmt(FN.k, 2);
-    const v = FN.v * 0.5144;
+    const v = FN.v * KN;
     const Mmax = 2 * (RHO / 2) * v * v * FN.S * 1.0 * FN.z / 1000;   // МН·м при C_L = 1
     const red = FN.ampN > 0.2 ? (1 - FN.ampS / FN.ampN) * 100 : 0;
     const bad = FN.ampS > FN.ampN * 1.02 && FN.ampN > 0.2;
@@ -541,7 +521,7 @@
         <line x1="103" y1="110" x2="227" y2="110" stroke="#16161a" stroke-width="2"/>
         <line x1="165" y1="192" x2="165" y2="64" stroke="${RED}" stroke-width="1.2"/>
         <rect x="127" y="118" width="76" height="62" rx="6" fill="#f7f7f4" stroke="${AX}" stroke-width="1.3"/>
-        <g id="gy-gimb">
+        <g id="gy-gimb" transform="translate(165 149)">
           <rect x="-30" y="-26" width="60" height="52" rx="6" fill="none" stroke="${BLU}" stroke-width="2.4"/>
           <circle cx="0" cy="0" r="20" fill="#eef3ff" stroke="${BLU}" stroke-width="1.4"/>
           <g id="gy-fly">
@@ -558,9 +538,7 @@
     s += `<text x="372" y="32" style="${fs(12, AX)}">запись угла крена, последние 40 с</text>
       <line x1="372" y1="${gyY(0)}" x2="710" y2="${gyY(0)}" stroke="${AX}" stroke-width="1.1"/>
       <line x1="372" y1="46" x2="372" y2="272" stroke="${AX}" stroke-width="1.1"/>`;
-    for (let v = -20; v <= 20; v += 10)
-      s += `<line x1="368" y1="${gyY(v)}" x2="372" y2="${gyY(v)}" stroke="${AX}"/>` +
-        `<text x="365" y="${gyY(v) + 4}" text-anchor="end" style="${fs(10.5, AX)}">${v}</text>`;
+    s += yTicks(gyY, [-20, -10, 0, 10, 20], 368, 372, 365);
     s += `<text x="352" y="40" style="${fs(11, AX)}">θ, град</text>
       <path id="gy-tr0" d="" fill="none" stroke="#9a9aa2" stroke-width="1.2"/>
       <path id="gy-tr" d="" fill="none" stroke="${ACC}" stroke-width="1.7"/>
@@ -591,13 +569,7 @@
 
   function gySteady() {
     const S = { x: GY.x, vx: GY.vx, x0: GY.x0, vx0: GY.vx0, phi: GY.phi, vphi: GY.vphi, t: GY.t, M: 0 };
-    for (let i = 0; i < 25000; i++) gyPhys(S, 0.004);
-    let pk = 0, pk0 = 0;
-    for (let i = 0; i < 7500; i++) {
-      gyPhys(S, 0.004);
-      pk = Math.max(pk, Math.abs(S.x)); pk0 = Math.max(pk0, Math.abs(S.x0));
-    }
-    GY.ampS = pk * R2D; GY.ampN = pk0 * R2D;
+    [GY.ampS, GY.ampN] = steadyAmps(gyPhys, S, 0.004, 25000, 7500, null);
   }
 
   function gyStep(dt) {
