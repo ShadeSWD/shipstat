@@ -33,6 +33,7 @@ function miniChart(host, title, unit, pts, opts = {}) {
     'stroke-linejoin': 'round',
   }, svg);
   // доп. серия (например x_f или z_g) — с прямой подписью на графике
+  let yExtraLbl = null, extraLblEl = null;
   if (opts.extra) {
     svgEl('polyline', {
       points: opts.extra.map(p => X(p[0]).toFixed(1) + ',' + Y(p[1]).toFixed(1)).join(' '),
@@ -40,14 +41,26 @@ function miniChart(host, title, unit, pts, opts = {}) {
     }, svg);
     if (opts.extraLabel) {
       const le = opts.extra[opts.extra.length - 1];
-      const t = svgEl('text', { x: X(le[0]) - 4, y: clamp(Y(le[1]) - 5, padT + 9, H - padB - 3), 'text-anchor': 'end' }, svg);
-      t.style.cssText = 'font:600 10px system-ui;fill:#6b6b74;paint-order:stroke;stroke:#ffffffdd;stroke-width:3px';
-      t.textContent = opts.extraLabel;
+      yExtraLbl = clamp(Y(le[1]) - 5, padT + 9, H - padB - 3);
+      extraLblEl = svgEl('text', { x: X(le[0]) - 4, y: yExtraLbl, 'text-anchor': 'end' }, svg);
+      extraLblEl.style.cssText = 'font:600 10px system-ui;fill:#6b6b74;paint-order:stroke;stroke:#ffffffdd;stroke-width:3px';
+      extraLblEl.textContent = opts.extraLabel;
     }
   }
   if (opts.mainLabel) {
     const lm = pts[pts.length - 1];
-    const t = svgEl('text', { x: X(lm[0]) - 4, y: clamp(Y(lm[1]) + 12, padT + 9, H - padB - 3), 'text-anchor': 'end' }, svg);
+    let yMain = clamp(Y(lm[1]) + 12, padT + 9, H - padB - 3);
+    /* когда кривые почти сливаются (x꜀ ≈ x_f, z_m ≈ z_g), подписи садились одна
+       на другую — разводим их на строку, при нехватке места снизу поднимаем
+       подпись доп. серии */
+    if (yExtraLbl !== null && Math.abs(yMain - yExtraLbl) < 12) {
+      yMain = clamp(yExtraLbl + 12, padT + 9, H - padB - 3);
+      if (Math.abs(yMain - yExtraLbl) < 12 && extraLblEl) {
+        yExtraLbl = yMain - 12;
+        extraLblEl.setAttribute('y', yExtraLbl);
+      }
+    }
+    const t = svgEl('text', { x: X(lm[0]) - 4, y: yMain, 'text-anchor': 'end' }, svg);
     t.style.cssText = 'font:600 10px system-ui;fill:' + (opts.color || '#155e75') + ';paint-order:stroke;stroke:#ffffffdd;stroke-width:3px';
     t.textContent = opts.mainLabel;
   }

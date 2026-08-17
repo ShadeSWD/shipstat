@@ -123,7 +123,7 @@
     s += `<line x1="${X(K.wt)}" y1="${padT}" x2="${X(K.wt)}" y2="${H - padB}" stroke="#b3382e" stroke-width="1" stroke-dasharray="3 4"/>` +
       `<text x="${X(K.wt) + 4}" y="${H - padB - 6}" style="font:11px system-ui;fill:#b3382e">ω_θ</text>`;
     s += `<text x="${W - padR}" y="${H - 6}" text-anchor="end" style="font:12px system-ui;fill:#6b6b74">ω, 1/с</text>`;
-    s += `<text x="14" y="${padT}" style="font:12px system-ui;fill:#6b6b74">θ_m/α₀</text>`;
+    s += `<text x="14" y="${padT - 12}" style="font:12px system-ui;fill:#6b6b74">θ_m/α₀</text>`;
     // легенда
     const ly = padT + 6;
     s += `<line x1="${W - 250}" y1="${ly}" x2="${W - 222}" y2="${ly}" stroke="#155e75" stroke-width="2"/><text x="${W - 216}" y="${ly + 4}" style="font:11.5px system-ui;fill:#16161a">полное уравнение</text>` +

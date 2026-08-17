@@ -125,7 +125,7 @@
   }
 
   function chartNu(ptsB, ptsL) {
-    const W = 640, H = 300, padL = 56, padR = 16, padT = 18, padB = 36;
+    const W = 640, H = 300, padL = 56, padR = 16, padT = 32, padB = 36;   // padT — место под подпись оси
     const xs = ptsB.map(p => p[0]), ys = ptsB.concat(ptsL).map(p => p[1]);
     const x0 = Math.floor(Math.min(...xs)), x1 = Math.ceil(Math.max(...xs));
     const y0 = Math.floor(Math.min(...ys) * 200) / 200, y1 = Math.ceil(Math.max(...ys) * 200) / 200;
@@ -143,7 +143,7 @@
     for (const [x, y] of ptsL) s += `<circle cx="${X(x)}" cy="${Y(y)}" r="2.6" fill="#b3382e"/>`;
     for (const [x, y] of ptsB) s += `<circle cx="${X(x)}" cy="${Y(y)}" r="3.4" fill="none" stroke="#155e75" stroke-width="1.8"/>`;
     s += `<text x="${W - padR}" y="${H - 8}" text-anchor="end" style="font:12px system-ui;fill:#6b6b74">θ_ср, град</text>` +
-      `<text x="14" y="${padT - 4}" style="font:12px system-ui;fill:#6b6b74">2ν̄_θ</text>` +
+      `<text x="14" y="${padT - 14}" style="font:12px system-ui;fill:#6b6b74">2ν̄_θ</text>` +
       `<circle cx="${padL + 16}" cy="${padT + 8}" r="3.4" fill="none" stroke="#155e75" stroke-width="1.8"/>` +
       `<text x="${padL + 26}" y="${padT + 12}" style="font:11.5px system-ui;fill:#16161a">формула Благовещенского</text>` +
       `<circle cx="${padL + 226}" cy="${padT + 8}" r="2.6" fill="#b3382e"/>` +
@@ -337,7 +337,8 @@
     pts.forEach((p, i) => { s += `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="${i === iSel ? 4.4 : 3}" fill="${i === iSel ? '#b3382e' : color}"/>`; });
     s += `<text x="${padL}" y="${padT - 10}" style="font:12.5px system-ui;fill:#16161a">${title}</text>` +
       `<text x="${W - padR}" y="${H - 8}" text-anchor="end" style="font:12px system-ui;fill:#6b6b74">${xl}</text>` +
-      `<text x="14" y="${padT + 6}" style="font:12px system-ui;fill:#6b6b74">${yl}</text>`;
+      // подпись оси y — над полем, иначе садится на числа шкалы
+      `<text x="14" y="${padT - 10}" style="font:12px system-ui;fill:#6b6b74">${yl}</text>`;
     return `<svg viewBox="0 0 ${W} ${H}" class="geo-board">${s}</svg>`;
   }
 

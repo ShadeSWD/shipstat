@@ -402,7 +402,7 @@
       <g id="fn-speed"><line x1="250" y1="238" x2="330" y2="238" stroke="${ACC}" stroke-width="1.6" marker-end="url(#fnArrV)"/>
       <text id="fn-vtxt" x="250" y="256" style="${fs(11.5, ACC)}">ход 16,0 уз</text></g>
       <text id="fn-alp" x="10" y="306" style="font:600 13px system-ui;fill:#16161a"></text>`;
-    s += `<text x="372" y="36" style="${fs(12, AX)}">запись угла крена, последние 40 с</text>
+    s += `<text x="396" y="36" style="${fs(12, AX)}">запись угла крена, последние 40 с</text>
       <line x1="372" y1="${fnY(0)}" x2="710" y2="${fnY(0)}" stroke="${AX}" stroke-width="1.1"/>
       <line x1="372" y1="52" x2="372" y2="292" stroke="${AX}" stroke-width="1.1"/>`;
     s += yTicks(fnY, [-20, -10, 0, 10, 20], 368, 372, 365);
@@ -535,7 +535,7 @@
         <path id="gy-mom" d="" fill="none" stroke="${GRN}" stroke-width="2.4" marker-end="url(#gyArr)" opacity="0"/>
       </g>
       <text id="gy-txt" x="10" y="288" style="font:600 13px system-ui;fill:#16161a"></text>`;
-    s += `<text x="372" y="32" style="${fs(12, AX)}">запись угла крена, последние 40 с</text>
+    s += `<text x="396" y="32" style="${fs(12, AX)}">запись угла крена, последние 40 с</text>
       <line x1="372" y1="${gyY(0)}" x2="710" y2="${gyY(0)}" stroke="${AX}" stroke-width="1.1"/>
       <line x1="372" y1="46" x2="372" y2="272" stroke="${AX}" stroke-width="1.1"/>`;
     s += yTicks(gyY, [-20, -10, 0, 10, 20], 368, 372, 365);

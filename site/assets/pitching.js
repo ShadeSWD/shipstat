@@ -49,7 +49,7 @@
       <line x1="384" y1="322" x2="700" y2="322" stroke="${AX}" stroke-width="1.1"/>
       <line x1="384" y1="56" x2="384" y2="322" stroke="${AX}" stroke-width="1.1"/>
       <g id="en-ax"></g>
-      <text x="700" y="346" text-anchor="end" style="${fs(11, AX)}">скорость v, уз</text>
+      <text x="700" y="360" text-anchor="end" style="${fs(11, AX)}">скорость v, уз</text>
       <text x="356" y="50" style="${fs(11, AX)}">χ, град</text>
       <circle id="en-pt" r="6" fill="#fff" stroke="#16161a" stroke-width="2.2"/>
       <rect x="392" y="30" width="11" height="8" fill="rgba(179,56,46,.45)"/>
