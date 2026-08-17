@@ -476,13 +476,15 @@
     $('fn-fL').setAttribute('transform', `translate(102 186) rotate(${(-FN.al).toFixed(1)})`);
     $('fn-fR').setAttribute('transform', `translate(238 186) rotate(${(FN.al).toFixed(1)})`);
     const lift = clamp(FN.M / 1800 * 34, -46, 46);
-    const arr = (id, x0) => {
+    /* крылья работают парой: на одном борту подъёмная сила вверх, на другом
+       вниз — только такая пара даёт момент и не меняет осадку */
+    const arr = (id, x0, sgn) => {
       const el = $(id);
       el.setAttribute('x1', x0); el.setAttribute('y1', 186);
-      el.setAttribute('x2', x0); el.setAttribute('y2', (186 - lift).toFixed(1));
+      el.setAttribute('x2', x0); el.setAttribute('y2', (186 - sgn * lift).toFixed(1));
       el.setAttribute('opacity', Math.abs(lift) > 2 ? 0.95 : 0);
     };
-    arr('fn-arL', 86); arr('fn-arR', 254);
+    arr('fn-arL', 86, -1); arr('fn-arR', 254, 1);
     FN.acc += dt;
     if (FN.acc > 0.3) {
       FN.acc = 0;

@@ -239,7 +239,7 @@
       <path id="pt-wave" d="" fill="rgba(21,94,117,.16)" stroke="${ACC}" stroke-width="1.6"/>
       <text x="10" y="18" style="${fs(12, AX)}">вид сбоку, вертикальный масштаб увеличен в 2,5 раза</text>
       <g id="pt-ship">
-        <path d="M -150 -21 L -150 18 Q -150 40 -132 40 L 118 40 Q 142 40 150 6 L 150 -30 Z"
+        <path d="M -150 -26 Q 0 -14 152 -36 L 140 18 Q 133 40 112 40 L -122 40 Q -150 40 -150 14 Z"
               fill="#fff" stroke="#16161a" stroke-width="2"/>
         <line x1="-150" y1="0" x2="150" y2="0" stroke="#9a9aa2" stroke-width="1" stroke-dasharray="5 4"/>
         <circle cx="135" cy="0" r="3.4" fill="${RED}"/>
