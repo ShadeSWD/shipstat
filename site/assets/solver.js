@@ -119,7 +119,7 @@ function applyHullParams() {
 let hullBoard = null;   // поле эскиза создаётся один раз и перерисовывается
 
 function drawHullSketch(h) {
-  const B = hullBoard || (hullBoard = new Board('#b-hullsketch', { w: 790, h: 340 }));
+  const B = hullBoard || (hullBoard = new Board('#b-hullsketch', { w: 790, h: 340, autofit: false, labelGap: 14 }));
   B.clear();
   // полуширота (вид сверху) и мидель
   // масштабы эскиза подстраиваются под размерения корпуса (при значениях по
